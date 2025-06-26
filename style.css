@@ -21,182 +21,13 @@ body {
             bottom: -20px;
         }
 
+        h2{
+            font-size: 2em;
+        }
+
         p{
             color:black;
             font-size: 2em;
-        }
-
-        .points-display {
-            background: rgba(255,255,255,0.2);
-            padding: 15px 30px;
-            border-radius: 25px;
-            color: white;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .save-section {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            margin-bottom: 20px;
-            text-align: center;
-            color: white;
-        }
-
-        .save-code {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 1.2em;
-            color: #ffd700;
-            margin: 10px 0;
-            word-break: break-all;
-            user-select: all;
-        }
-
-        .save-input {
-            width: 300px;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            margin: 5px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            transition: all 0.3s ease;
-        }
-
-        .save-btn {
-            background: #2ecc71;
-            color: white;
-        }
-
-        .load-btn {
-            background: #3498db;
-            color: white;
-        }
-
-        .reset-btn {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 15px;
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-        }
-
-        .point-cell {
-            width: 80px;
-            height: 80px;
-            border: 3px solid #fff;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 2em;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .point-cell:hover {
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .point-cell.collected {
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
-            animation: collectAnimation 0.5s ease-out;
-        }
-
-        @keyframes collectAnimation {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-
-        .reward-section {
-            margin-top: 30px;
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            color: white;
-            text-align: center;
-        }
-
-        .reward-item {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            font-size: 0.9em;
-        }
-
-        .reward-item.available {
-            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3em;
-            color: #ffd700;
-            animation: celebrate 1s ease-out;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
-        @keyframes celebrate {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        .instructions {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            color: white;
-            font-size: 0.9em;
-            text-align: center;
         }
 
         .navbar {
@@ -260,5 +91,77 @@ body {
         }
 
         .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        img[src="口罩.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="口罩.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="杯子.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="杯子.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="機車套.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="機車套.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="腕帶.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="腕帶.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="袖套.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="袖套.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="識別證帶.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="識別證帶.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="頭帶.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="頭帶.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="飄飄帶.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="飄飄帶.png"]:active{
+            transform: translateY(0);
+        }
+
+        img[src="行李箱帶.png"]:hover{
+            transform: translateY(-20px);
+        }
+
+        img[src="行李箱帶.png"]:active{
             transform: translateY(0);
         }
