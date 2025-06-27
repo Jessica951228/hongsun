@@ -17,3 +17,21 @@ function showSection(sectionId, clickedBtn) {
             // 為點擊的按鈕添加 active 狀態
             clickedBtn.classList.add('active');
         }
+
+        // 顯示按鈕的條件
+    window.onscroll = function () {
+      const btn = document.getElementById("toTopBtn");
+      if (document.documentElement.scrollTop > 300) {
+        btn.style.display = "block";
+      } else {
+        btn.style.display = "none";
+      }
+    };
+
+    // 點擊按鈕回頂部
+    document.getElementById("toTopBtn").onclick = function () {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    };
