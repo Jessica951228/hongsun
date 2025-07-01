@@ -154,39 +154,6 @@ img {
     margin: 40px 0;
 }
 
-/* 新聞專區 */
-.news-section {
-    width: 100%;
-    max-width: 800px;
-    margin: 40px 0;
-}
-
-        .news-links {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .news-links a {
-            color: #2c5aa0;
-            text-decoration: none;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            padding: 12px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .news-links a:hover {
-            background: rgba(44, 90, 160, 0.1);
-            transform: translateX(5px);
-            color: #1a4480;
-        }
 /* 產品圖片網格佈局 */
 .product-grid {
     display: grid;
