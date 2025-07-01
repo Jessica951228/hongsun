@@ -11,11 +11,6 @@
 </head>
 
 <body>
-    <img src="公司.png" alt="公司名">
-    <h2>眾多精美產品等著你</h2>
-    <img src="織帶.png" style="width:1000px; height:auto;" alt="公司名">
-    <img src="袋子.png" style="width:1000px; height:auto;" alt="公司名">
-
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-buttons">
@@ -27,23 +22,50 @@
             </div>
         </div>
     </nav>
+    
+    <img src="公司.png" alt="公司名">
+     <!-- 產品展示區 -->
+    <section class="product-showcase">
+        <h2>眾多精美產品等著你</h2>
+        <div class="showcase-images">
+            <img src="織帶.png" alt="織帶產品展示">
+            <img src="袋子.png" alt="袋子產品展示">
+        </div>
+    </section>
 
-    <h2>熱門商品</h2>
-        <a href="https://reurl.cc/GnMevd">
-            <img src="行李箱帶.png" style="width:500px; height:auto;" alt="行李箱帶">
-        </a>
-        <a href="https://reurl.cc/bW17ol">
-            <img src="機車套.png"  style="width:500px; height:auto;"alt="機車套">
-        </a>
-        <a href="https://reurl.cc/QY84kq">
-            <img src="識別證帶.png"  style="width:500px; height:auto;"alt="識別證帶"><br>
-        </a>
+    <!-- 熱門商品 -->
+    <section class="popular-products">
+        <h2>熱門商品</h2>
+        <div class="product-grid">
+            <a href="https://reurl.cc/GnMevd" class="product-item" target="_blank" rel="noopener">
+                <img src="行李箱帶.png" alt="行李箱帶">
+                <div class="product-title">行李箱帶</div>
+            </a>
+            <a href="https://reurl.cc/bW17ol" class="product-item" target="_blank" rel="noopener">
+                <img src="機車套.png" alt="機車套">
+                <div class="product-title">機車套</div>
+            </a>
+            <a href="https://reurl.cc/QY84kq" class="product-item" target="_blank" rel="noopener">
+                <img src="識別證帶.png" alt="識別證帶">
+                <div class="product-title">識別證帶</div>
+            </a>
+        </div>
+    </section>
 
-    <h2>新聞專區</h2>
-    <a href="https://www.epochtimes.com/b5/20/8/26/n12358235.htm">傳產轉型觀光工廠 彰化縣長盛讚傳產二代根留台灣勇氣</a>
-    <a href="https://www.chcg.gov.tw/ch2/newsdetail.aspx?bull_id=330395">走春首選　彰化15家觀光工廠一覽</a>
-    <a href="https://www.youtube.com/watch?v=EPJCaHn44PA">2020｜公司企業｜訪談簡介｜織夢樂園觀光工廠形象簡介影片</a>
-
+    <!-- 新聞專區 -->
+    <section class="news-section">
+        <h2>新聞專區</h2>
+        <div class="news-links">
+            <a href="https://www.epochtimes.com/b5/20/8/26/n12358235.htm" target="_blank" rel="noopener">
+                傳產轉型觀光工廠 彰化縣長盛讚傳產二代根留台灣勇氣
+            </a>
+            <a href="https://www.chcg.gov.tw/ch2/newsdetail.aspx?bull_id=330395" target="_blank" rel="noopener">
+                走春首選　彰化15家觀光工廠一覽
+            </a>
+            <a href="https://www.youtube.com/watch?v=EPJCaHn44PA" target="_blank" rel="noopener">
+                2020｜公司企業｜訪談簡介｜織夢樂園觀光工廠形象簡介影片
+            </a>
+        </div>
     <button id="toTopBtn">↑ Top</button>
     
     <script src="script.js"></script>

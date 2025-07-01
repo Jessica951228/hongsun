@@ -35,3 +35,31 @@ function showSection(sectionId, clickedBtn) {
         behavior: "smooth"
       });
     };
+
+// 導航按鈕活動狀態
+        document.addEventListener('DOMContentLoaded', function() {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            const currentPage = window.location.pathname.split('/').pop();
+            
+            navBtns.forEach(btn => {
+                if (btn.getAttribute('href') === currentPage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+
+        // 平滑滾動效果
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
