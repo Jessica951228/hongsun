@@ -63,3 +63,16 @@ function showSection(sectionId, clickedBtn) {
                 }
             });
         });
+
+        // 添加一些互動效果
+        document.querySelectorAll('.product-item').forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            
+            item.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
