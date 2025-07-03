@@ -3,6 +3,7 @@ body {
     background:  #FFF8DC;
     margin: 0;
     padding: 20px;
+    padding-top: 80px; /* 為導航欄留出空間 */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -36,6 +37,8 @@ p {
     width: 100%;
     z-index: 1000;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    /* 增加最小高度以確保一致性 */
+    min-height: 60px;
 }
 
 .nav-container {
@@ -46,6 +49,7 @@ p {
     justify-content: space-between;
     padding: 0 20px;
     flex-wrap: wrap;
+    min-height: 60px;
 }
 
 .nav-buttons {
@@ -378,6 +382,10 @@ transform: translateY(0);
 
 /* 平板橫向 (768px - 991px) */
 @media screen and (min-width: 768px) and (max-width: 991px) {
+    body {
+        padding-top: 90px; /* 增加上邊距 */
+    }
+    
     .product-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
@@ -391,13 +399,21 @@ transform: translateY(0);
         padding: 14px 18px;
         font-size: 0.9rem;
     }
+    
+    .navbar {
+        min-height: 70px;
+    }
+    
+    .nav-container {
+        min-height: 70px;
+    }
 }
 
 /* 平板直向 (576px - 767px) */
 @media screen and (min-width: 576px) and (max-width: 767px) {
     body {
         padding: 15px;
-        padding-top: 100px;
+        padding-top: 110px; /* 增加上邊距避免遮擋 */
     }
     
     .product-grid {
@@ -407,6 +423,7 @@ transform: translateY(0);
     
     .nav-container {
         padding: 10px;
+        min-height: 80px;
     }
     
     .nav-btn {
@@ -414,9 +431,30 @@ transform: translateY(0);
         font-size: 0.85rem;
     }
     
+    .navbar {
+        min-height: 80px;
+    }
+    
     .commodity {
         flex-direction: column;
         gap: 20px;
+    }
+    
+    /* 頁尾優化 */
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
     }
 }
 
@@ -424,7 +462,7 @@ transform: translateY(0);
 @media screen and (min-width: 480px) and (max-width: 575px) {
     body {
         padding: 10px;
-        padding-top: 120px;
+        padding-top: 120px; /* 增加上邊距 */
     }
     
     .product-grid {
@@ -432,9 +470,50 @@ transform: translateY(0);
         gap: 15px;
     }
     
+    .navbar {
+        min-height: 90px;
+    }
+    
+    .nav-container {
+        min-height: 90px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .nav-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+    
     .nav-btn {
-        padding: 10px 12px;
+        padding: 8px 10px;
         font-size: 0.8rem;
+        min-width: auto;
+        flex: 0 0 auto;
+    }
+    
+    /* 頁尾優化 */
+    .footer {
+        padding: 20px 10px;
+    }
+    
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 0 10px;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+        font-size: 12px;
     }
 }
 
@@ -442,7 +521,7 @@ transform: translateY(0);
 @media screen and (max-width: 479px) {
     body {
         padding: 8px;
-        padding-top: 140px;
+        padding-top: 140px; /* 調整上邊距 */
     }
     
     .product-grid {
@@ -454,16 +533,30 @@ transform: translateY(0);
         padding: 15px;
     }
     
+    .navbar {
+        min-height: 110px;
+    }
+    
+    .nav-container {
+        min-height: 110px;
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 5px 10px;
+    }
+    
     .nav-buttons {
-        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
         width: 100%;
+        gap: 0;
     }
     
     .nav-btn {
-        width: 100%;
-        text-align: center;
-        padding: 12px;
-        font-size: 0.85rem;
+        padding: 8px 6px;
+        font-size: 0.75rem;
+        min-width: auto;
+        flex: 0 0 auto;
+        margin: 2px;
     }
     
     .commodity {
@@ -474,12 +567,66 @@ transform: translateY(0);
     .full-width-image {
         margin-bottom: 20px;
     }
+    
+    /* 頁尾優化 */
+    .footer {
+        padding: 15px 8px;
+    }
+    
+    .footer-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 8px;
+    }
+    
+    .footer-logo {
+        font-size: 20px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .footer-links h4 {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+    
+    .footer-links li {
+        margin-bottom: 5px;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+        font-size: 11px;
+        margin-top: 15px;
+    }
+    
+    .footer-social {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    
+    .footer-social img {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 /* 超小螢幕 (320px 以下) */
 @media screen and (max-width: 320px) {
+    body {
+        padding-top: 100px; /* 調整上邊距 */
+    }
+    
     .nav-btn {
-        padding: 10px;
+        padding: 10px 8px;
         font-size: 0.75rem;
     }
     
@@ -497,6 +644,25 @@ transform: translateY(0);
     
     p {
         font-size: 0.85rem;
+    }
+    
+    /* 頁尾優化 */
+    .footer {
+        padding: 10px 5px;
+    }
+    
+    .footer-container {
+        padding: 0 5px;
+    }
+    
+    .footer-logo {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .footer-bottom {
+        font-size: 10px;
+        margin-top: 10px;
     }
 }
 
