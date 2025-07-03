@@ -232,6 +232,13 @@ img {
             transform: scale(1.05);
         }
 
+.commodity{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* 圖片之間的間距 */
+    flex-wrap: wrap; /* 響應式換行 */
+}
 
 /* 個別產品圖片動畫 */
 img[src="mask.png"]:hover,
