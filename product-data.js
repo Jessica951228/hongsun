@@ -39,7 +39,6 @@
         製作時間：7-10個工作天<br>
         支援格式：AI、PNG、JPG檔案</p>
       `,
-      price: "NT$ 280起",
       minOrder: "10條起訂",
       productionTime: "7-10個工作天",
       shopeeLink: "https://reurl.cc/bW17ol"
@@ -70,7 +69,6 @@
           <li>顏色：黑色、銀色可選</li>
         </ul>
       `,
-      price: "NT$ 580起",
       minOrder: "5件起訂",
       productionTime: "5-7個工作天",
       shopeeLink: "https://reurl.cc/bW17ol"
@@ -101,7 +99,6 @@
           <li>扣具：塑膠扣、金屬扣可選</li>
         </ul>
       `,
-      price: "NT$ 25起",
       minOrder: "100條起訂",
       productionTime: "7-10個工作天",
       shopeeLink: "https://reurl.cc/QY84kq"
@@ -132,7 +129,6 @@
           <li>防曬係數：UPF50+</li>
         </ul>
       `,
-      price: "NT$ 180起",
       minOrder: "20雙起訂",
       productionTime: "5-7個工作天",
       shopeeLink: "https://reurl.cc/3KdOE9"
@@ -163,7 +159,6 @@
           <li>顏色：多色可選</li>
         </ul>
       `,
-      price: "NT$ 80起",
       minOrder: "50個起訂",
       productionTime: "7-10個工作天",
       shopeeLink: "https://reurl.cc/knGler"

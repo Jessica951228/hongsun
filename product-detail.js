@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
       <h1>${product.name}</h1>
       <div class="product-detail-text">${product.detailedDescription}</div>
       <div class="product-info">
-        <p><strong>價格：</strong>${product.price}</p>
         <p><strong>最低訂購：</strong>${product.minOrder}</p>
         <p><strong>製作時間：</strong>${product.productionTime}</p>
       </div>
