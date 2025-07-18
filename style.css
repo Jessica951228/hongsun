@@ -122,6 +122,11 @@ p {
     border-radius: 10px;
 }
 
+.view-detail-btn{
+    background-color: rgb(179, 220, 246);
+    border-radius: 10px;
+}
+
 .footer{
     background-color:rgb(222, 216, 216)
 }
@@ -236,7 +241,7 @@ img {
             transform: scale(1.05);
         }
 
-.commodity{
+#commodity{
     display: flex;
     justify-content: center;
     align-items: center;
