@@ -14,8 +14,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, '.')));
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
@@ -32,9 +32,9 @@ app.use(session({
     }
 }));
 
-// 診斷 session
+// 診斷中間件
 app.use((req, res, next) => {
-    console.log(`請求: ${req.method} ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
+    console.log(`[${new Date().toISOString()}] 請求: ${req.method} ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}, Body: ${JSON.stringify(req.body)}`);
     next();
 });
 
@@ -76,13 +76,13 @@ try {
         const data = fs.readFileSync(productsFile, 'utf-8');
         const parsed = JSON.parse(data);
         products = Array.isArray(parsed) ? parsed : [];
-        console.log('成功載入 products.json，商品數:', products.length);
+        console.log(`[${new Date().toISOString()}] 成功載入 products.json，商品數: ${products.length}`);
     } else {
         fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
-        console.log('創建新的 products.json');
+        console.log(`[${new Date().toISOString()}] 創建新的 products.json`);
     }
 } catch (err) {
-    console.error('載入 products.json 失敗:', err.message);
+    console.error(`[${new Date().toISOString()}] 載入 products.json 失敗: ${err.message}`);
     products = [];
     fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
 }
@@ -90,47 +90,47 @@ try {
 function saveProducts() {
     try {
         fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
-        console.log('成功儲存 products.json，商品數:', products.length);
+        console.log(`[${new Date().toISOString()}] 成功儲存 products.json，商品數: ${products.length}`);
     } catch (err) {
-        console.error('儲存 products.json 失敗:', err.message);
+        console.error(`[${new Date().toISOString()}] 儲存 products.json 失敗: ${err.message}`);
     }
 }
 
 // 中間件：檢查是否登入
 function isAuthenticated(req, res, next) {
-    console.log(`檢查訪問: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
+    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
     if (req.session.isAuthenticated) {
         return next();
     }
-    console.log('未登入，重定向到 /login.html');
+    console.log(`[${new Date().toISOString()}] 未登入，重定向到 /login.html`);
     res.redirect('/login.html');
 }
 
 // 路由：檢查登入狀態
 app.get('/check-auth', (req, res) => {
-    console.log('檢查 /check-auth, isAuthenticated:', req.session.isAuthenticated);
+    console.log(`[${new Date().toISOString()}] 檢查 /check-auth, isAuthenticated: ${req.session.isAuthenticated}`);
     res.json({ success: true, isAuthenticated: !!req.session.isAuthenticated });
 });
 
 // 路由：登入
 app.post('/login', (req, res) => {
-    console.log('登入請求，收到資料:', req.body);
+    console.log(`[${new Date().toISOString()}] 登入請求，收到資料: ${JSON.stringify(req.body)}`);
     const { password } = req.body;
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-    console.log('比較密碼:', password, '與', adminPassword);
-    if (password === adminPassword) {
+    console.log(`[${new Date().toISOString()}] 比較密碼: ${password} 與 ${adminPassword}`);
+    if (password && password === adminPassword) {
         req.session.isAuthenticated = true;
-        console.log('登入成功，Session:', req.session);
+        console.log(`[${new Date().toISOString()}] 登入成功，Session: ${JSON.stringify(req.session)}`);
         res.json({ success: true, message: '登入成功' });
     } else {
-        console.log('密碼錯誤');
+        console.log(`[${new Date().toISOString()}] 密碼錯誤`);
         res.status(401).json({ success: false, message: '密碼錯誤' });
     }
 });
 
 // 路由：登出
 app.post('/logout', (req, res) => {
-    console.log('登出請求，銷毀 Session');
+    console.log(`[${new Date().toISOString()}] 登出請求，銷毀 Session`);
     req.session.destroy(() => {
         res.json({ success: true, message: '登出成功' });
     });
@@ -143,7 +143,7 @@ app.get('/', (req, res) => {
 
 // 路由：後台頁面
 app.get('/admin.html', isAuthenticated, (req, res) => {
-    console.log('訪問 /admin.html, isAuthenticated:', req.session.isAuthenticated);
+    console.log(`[${new Date().toISOString()}] 訪問 /admin.html, isAuthenticated: ${req.session.isAuthenticated}`);
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
@@ -160,7 +160,7 @@ app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) =>
             url: `/uploads/${req.file.filename}`
         });
     } catch (error) {
-        console.error('圖片上傳錯誤:', error);
+        console.error(`[${new Date().toISOString()}] 圖片上傳錯誤: ${error}`);
         res.status(500).json({ success: false, message: '圖片上傳失敗: ' + error.message });
     }
 });
@@ -183,7 +183,7 @@ app.post('/add-product', isAuthenticated, (req, res) => {
         };
         
         if (!Array.isArray(products)) {
-            console.error('products 不是陣列，重新初始化');
+            console.error(`[${new Date().toISOString()}] products 不是陣列，重新初始化`);
             products = [];
         }
         
@@ -196,7 +196,7 @@ app.post('/add-product', isAuthenticated, (req, res) => {
             product: product
         });
     } catch (error) {
-        console.error('新增產品錯誤:', error);
+        console.error(`[${new Date().toISOString()}] 新增產品錯誤: ${error}`);
         res.status(500).json({ success: false, message: '新增產品失敗: ' + error.message });
     }
 });
@@ -242,17 +242,17 @@ app.delete('/products/:id', isAuthenticated, (req, res) => {
 
 // 錯誤處理中間件
 app.use((error, req, res, next) => {
-    console.error('伺服器錯誤:', error);
+    console.error(`[${new Date().toISOString()}] 伺服器錯誤: ${error}`);
     res.status(500).json({ success: false, message: '伺服器內部錯誤: ' + error.message });
 });
 
 // 404 處理
 app.use((req, res) => {
-    console.log(`404 錯誤: ${req.method} ${req.path}`);
+    console.log(`[${new Date().toISOString()}] 404 錯誤: ${req.method} ${req.path}`);
     res.status(404).json({ success: false, message: 'Not Found' });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`伺服器已啟動，網址: http://localhost:${PORT}`);
+    console.log(`[${new Date().toISOString()}] 伺服器已啟動，網址: http://localhost:${PORT}`);
 });
