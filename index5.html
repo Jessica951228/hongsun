@@ -5,52 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="宏尚網站"/>
     <meta name="author" content="Jessica"/>
-    <meta name="keywords" content="宏尚,公司,織帶,客製化,訂購,網站,彰化,北斗,蝦皮,傳產,口罩"/>
+    <meta name="keywords" content="宏尚,公司,織帶,客製化,訂購,網站,彰化,北斗,傳產,口罩"/>
     <title>宏尚織帶有限公司</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-    <img src="logo.jpg" alt="公司名">
+    <img src="logo.jpg" alt="公司名" class="company-logo">
     
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-buttons">
-                <a href="index.html" class="nav-btn active" onclick="showSection('home', this)">首頁</a>
+                <a href="index.html" class="nav-btn" onclick="showSection('home', this)">首頁</a>
                 <a href="index2.html" class="nav-btn" onclick="showSection('about', this)">關於我們</a>
-                <a href="index5.html" class="nav-btn" onclick="showSection('services', this)">商品</a>
+                <a href="index5.html" class="nav-btn active" onclick="showSection('services', this)">商品</a>
                 <a href="index3.html" class="nav-btn" onclick="showSection('contact', this)">聯絡我們</a>
-                <a href="https://shopee.tw/lanyardparadise" class="nav-btn" onclick="showSection('contact', this)">蝦皮賣場</a>
+                <a href="https://shopee.tw/lanyardparadise" class="nav-btn">蝦皮賣場</a>
             </div>
         </div>
     </nav>
 
-    <h2>精準客製  命中你心</h2>
+    <h2>精準客製 命中你心</h2>
 
-    <div id="commodity">
-       <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;">
+    <div id="commodity" class="product-grid">
+        <div class="product-item" style="display:inline-block;">
             <img src="luggage-strap.png" alt="行李箱帶">
-            <button class="btn view-detail-btn" onclick="window.location.href='product.html?id=1'">了解更多</button>
-            </div>
-        <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=1'">了解更多</button>
+        </div>
+        <div class="product-item" style="display:inline-block;">
             <img src="moto.png" alt="機車套">
-            <button id="product" onclick="location.href='https://reurl.cc/bW17ol'">了解更多</button>
-            </div>      
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=2'">了解更多</button>
+        </div>
+        <div class="product-item" style="display:inline-block;">
+            <img src="lanyard.png" alt="識別證帶">
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=3'">了解更多</button>
+        </div>
         <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
-            <img src="lanyard.png"  style="display:inline-block;" alt="識別證帶">
-            <button id="product" onclick="location.href='https://reurl.cc/QY84kq'">了解更多</button>
-            </div>
-         <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
             <img src="arm-cover.png"  style="display:inline-block;" alt="袖套">
-            <button id="product" onclick="location.href='https://reurl.cc/3KdOE9'">了解更多</button>
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=4'">了解更多</button>
             </div>
         <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
             <img src="wristband.png"  style="display:inline-block;" alt="腕帶">
-            <button id="product" onclick="location.href='https://reurl.cc/knGler'">了解更多</button>
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=5'">了解更多</button>
             </div>
         <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
             <img src="luggage-ribbon.png"  style="display:inline-block;" alt="飄飄帶">
-            <button id="product" onclick="location.href='https://reurl.cc/VYy8b5'">了解更多</button>
+            <button class="view-detail-btn" onclick="window.location.href='product.html?id=6'">了解更多</button>
             </div>
          <div class="product-item" target="_blank" rel="noopener" style="display:inline-block;" >
             <img src="head.png"  style="display:inline-block;" alt="頭帶">
@@ -196,41 +195,97 @@
             <img src="two-iron-head.jpg"  style="display:inline-block;" alt=" 客製化識別證帶|雙頭鉤|雙頭鐵夾">
             <button id="product" onclick="location.href='https://reurl.cc/Nx1vzq'">了解更多</button>
             </div>
+        <div id="dynamic-products" class="product-grid"></div>
     </div>
 
-   <footer class="footer">
-    <div class="footer-container">
-    <div class="footer-logo"><h3>宏尚織帶有限公司</h3></div>
 
-    <div class="footer-links">
-      <div>
-        <h4>關於宏尚</h4>
-        <ul>
-          <li><a href="index2.html">企業資訊</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>顧客服務</h4>
-        <ul>
-          <li><a href="index6.html">購物說明</a></li>
-          <li><a href="index3.html">聯絡我們</a></li>
-        </ul>
-        <ul>
-            <h4>隱私權與網站使用條款</h4>
-            <li><a href="index7.html">隱私權政策</a></li>
-            <li><a href="index8.html">網站使用條款</a></li>
-        </ul>
-      </div>
+        <div id="dynamic-products" class="product-grid"></div>
     </div>
 
-    <div class="footer-bottom">
-      <h5>Copyright © Hong Sun Webbing Decoration Co., Ltd. All rights reserved.擁有及保留本網站所有權利。</h5>
-      <button id="toTopBtn">↑ Top</button>
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="/admin.html" id="adminLink" style="background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+            前往後台新增商品
+        </a>
     </div>
-  </div>
-</footer>
-    <script src="product-data.js"></script>
-    <script src="product-detail.js"></script>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo"><h3>宏尚織帶有限公司</h3></div>
+            <div class="footer-links">
+                <div>
+                    <h4>關於宏尚</h4>
+                    <ul>
+                        <li><a href="index2.html">企業資訊</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>顧客服務</h4>
+                    <ul>
+                        <li><a href="index6.html">購物說明</a></li>
+                        <li><a href="index3.html">聯絡我們</a></li>
+                    </ul>
+                    <ul>
+                        <h4>隱私權與網站使用條款</h4>
+                        <li><a href="index7.html">隱私權政策</a></li>
+                        <li><a href="index8.html">網站使用條款</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <h5>Copyright © Hong Sun Webbing Decoration Co., Ltd. All rights reserved.</h5>
+                <button id="toTopBtn">↑ Top</button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        async function loadDynamicProducts() {
+            try {
+                const response = await fetch('/products', { credentials: 'include' });
+                if (!response.ok) throw new Error('無法載入商品');
+                const data = await response.json();
+                const dynamicProducts = document.getElementById('dynamic-products');
+                dynamicProducts.innerHTML = '';
+
+                data.products.forEach(product => {
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+                    div.style.display = 'inline-block';
+                    div.innerHTML = `
+                        <img src="/uploads/${product.img}" alt="${product.name}">
+                        <p>${product.name}</p>
+                        <p>價格: ${product.price} 元</p>
+                        <button class="view-detail-btn" onclick="window.location.href='product-detail.html?id=${product.id}'">了解更多</button>
+                    `;
+                    dynamicProducts.appendChild(div);
+                });
+            } catch (err) {
+                console.error('載入商品錯誤:', err);
+            }
+        }
+
+        document.getElementById('adminLink').addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/check-auth', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                if (result.isAuthenticated) {
+                    window.location.href = '/admin.html';
+                } else {
+                    alert('請先登入後台！');
+                    window.location.href = '/login.html';
+                }
+            } catch (err) {
+                console.error('檢查登入狀態失敗:', err);
+                alert('無法檢查登入狀態，請稍後再試');
+            }
+        });
+
+        loadDynamicProducts();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

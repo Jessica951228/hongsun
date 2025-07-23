@@ -1,85 +1,115 @@
 document.getElementById('addProductForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    document.getElementById('message').innerText = '上傳中...';
 
-  const form = e.target;
-  const formData = new FormData();
-  
-  // 檢查是否選擇了圖片文件
-  if (!form.image.files[0]) {
-    document.getElementById('message').innerText = '請選擇圖片文件';
-    return;
-  }
-  
-  // 先上傳圖片
-  formData.append('image', form.image.files[0]);
-  
-  try {
-    // 上傳圖片
-    const imageRes = await fetch('/upload-image', {
-      method: 'POST',
-      body: formData
-    });
-    
-    // 先檢查響應狀態，再解析 JSON
-    if (!imageRes.ok) {
-      // 如果響應不成功，嘗試解析錯誤消息
-      let errorMessage = `HTTP ${imageRes.status}`;
-      try {
-        const errorResult = await imageRes.json();
-        errorMessage = errorResult.message || errorMessage;
-      } catch (jsonError) {
-        // 如果無法解析 JSON，使用默認錯誤消息
-        errorMessage = `圖片上傳失敗 (${imageRes.status})`;
-      }
-      throw new Error(errorMessage);
-    }
-    
-    // 響應成功時才解析 JSON
-    const imageResult = await imageRes.json();
-    
-    // 檢查上傳結果
-    if (!imageResult.filename) {
-      throw new Error('圖片上傳失敗：沒有返回文件名');
-    }
-    
-    // 圖片上傳成功後，新增產品
-    const productData = {
-      name: form.name.value,
-      price: form.price.value,
-      img: imageResult.filename, // 使用上傳後的檔名
-      description: form.description.value
-    };
-
-    const productRes = await fetch('/add-product', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(productData)
-    });
-    
-    // 同樣先檢查響應狀態
-    if (!productRes.ok) {
-      let errorMessage = `HTTP ${productRes.status}`;
-      try {
-        const errorResult = await productRes.json();
-        errorMessage = errorResult.message || errorMessage;
-      } catch (jsonError) {
-        errorMessage = `產品新增失敗 (${productRes.status})`;
-      }
-      throw new Error(errorMessage);
+    const formData = new FormData();
+    if (!form.image.files[0]) {
+        document.getElementById('message').innerText = '請選擇圖片文件';
+        submitBtn.disabled = false;
+        return;
     }
 
-    const productResult = await productRes.json();
-    
-    // 顯示成功消息
-    document.getElementById('message').innerText = '產品新增成功！';
-    document.getElementById('message').style.color = 'green';
-    form.reset();
-    
-  } catch (err) {
-    console.error('詳細錯誤:', err);
-    document.getElementById('message').innerText = '錯誤: ' + err.message;
-    document.getElementById('message').style.color = 'red';
-  }
+    formData.append('image', form.image.files[0]);
+
+    try {
+        const imageRes = await fetch('/upload-image', {
+            method: 'POST',
+            body: formData
+        });
+        if (!imageRes.ok) {
+            const errorResult = await imageRes.json();
+            throw new Error(errorResult.message || `圖片上傳失敗 (${imageRes.status})`);
+        }
+        const imageResult = await imageRes.json();
+        if (!imageResult.filename) {
+            throw new Error('圖片上傳失敗：沒有返回文件名');
+        }
+
+        const productData = {
+            name: form.name.value,
+            price: form.price.value,
+            img: imageResult.filename,
+            description: form.description.value
+        };
+
+        const productRes = await fetch('/add-product', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productData)
+        });
+        if (!productRes.ok) {
+            const errorResult = await productRes.json();
+            throw new Error(errorResult.message || `產品新增失敗 (${productRes.status})`);
+        }
+
+        document.getElementById('message').innerText = '產品新增成功！';
+        document.getElementById('message').style.color = 'green';
+        form.reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        submitBtn.disabled = false;
+        loadProducts();
+    } catch (err) {
+        console.error('錯誤:', err);
+        document.getElementById('message').innerText = '錯誤: ' + (err.message.includes('push is not a function') ? '伺服器資料格式錯誤，請聯繫管理員' : err.message);
+        document.getElementById('message').style.color = 'red';
+        submitBtn.disabled = false;
+    }
 });
+
+document.getElementById('addProductForm').image.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = document.getElementById('imagePreview');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+async function loadProducts() {
+    try {
+        const response = await fetch('/products');
+        if (!response.ok) throw new Error('無法載入商品');
+        const data = await response.json();
+        const productList = document.getElementById('productList');
+        productList.innerHTML = '';
+        data.products.forEach(product => {
+            const div = document.createElement('div');
+            div.className = 'product-preview';
+            div.innerHTML = `
+                <img src="/uploads/${product.img}" alt="${product.name}">
+                <div>
+                    <p><strong>${product.name}</strong></p>
+                    <p>價格: ${product.price} 元</p>
+                    <p>${product.description}</p>
+                    <button onclick="deleteProduct('${product.id}')">刪除</button>
+                </div>
+            `;
+            productList.appendChild(div);
+        });
+    } catch (err) {
+        console.error('載入商品錯誤:', err);
+    }
+}
+
+async function deleteProduct(id) {
+    if (!confirm('確定要刪除此商品？')) return;
+    try {
+        const response = await fetch(`/products/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('刪除失敗');
+        document.getElementById('message').innerText = '商品刪除成功！';
+        document.getElementById('message').style.color = 'green';
+        loadProducts();
+    } catch (err) {
+        document.getElementById('message').innerText = '錯誤: ' + err.message;
+        document.getElementById('message').style.color = 'red';
+    }
+}
+
+loadProducts();

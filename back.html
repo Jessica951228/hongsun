@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行李箱帶 - 專業客製化服務</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .admin-panel {
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+            padding: 20px;
+        }
+
+        .admin-title {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+        }
+
+        .admin-title::before {
+            content: "⚙️";
+            margin-right: 10px;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .upload-text {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .preview-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .preview-title {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        .no-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1.1em;
+        }
+
+        .product-info {
+            margin-top: 15px;
+        }
+
+        .info-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        .info-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .product-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .product-content {
+            padding: 25px;
+        }
+
+        .product-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .product-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .product-features {
+            list-style: none;
+        }
+
+        .product-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .product-features li:before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .product-features li:last-child {
+            border-bottom: none;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90%;
+            object-fit: contain;
+            margin-top: 2%;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #bbb;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>行李箱帶 - 專業客製化服務</h1>
+            <p>讓您的行李箱在機場轉盤上一眼就能辨識！</p>
+        </div>
+
+        <div class="admin-panel">
+            <h2 class="admin-title">產品管理系統</h2>
+            
+            <div class="success-message" id="successMessage">
+                產品已成功添加！
+            </div>
+
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">點擊或拖放圖片到此處</div>
+                    <div style="font-size: 0.9em; color: #999;">支援 JPG、PNG、GIF 格式</div>
+                    <input type="file" class="file-input" id="fileInput" accept="image/*">
+                </div>
+
+                <div class="preview-section">
+                    <div class="preview-title">圖片預覽</div>
+                    <div class="no-image" id="noImage">尚未選擇圖片</div>
+                    <img class="image-preview" id="imagePreview" style="display: none;">
+                    
+                    <div class="product-info">
+                        <input type="text" class="info-input" id="productTitle" placeholder="產品標題">
+                        <textarea class="info-input textarea" id="productDescription" placeholder="產品描述"></textarea>
+                        <button class="btn" onclick="addProduct()">添加產品</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="product-gallery" id="productGallery">
+                <!-- 預設產品 -->
+                <div class="product-card">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjZjBmMmZmIi8+CjxyZWN0IHg9IjUwIiB5PSI3NSIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxMDAiIHJ4PSIxMCIgZmlsbD0iIzY2N2VlYSIvPgo8dGV4dCB4PSIyMDAiIHk9IjEzNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCI+5Lit5paH6KGM5p2O566x5bi2PC90ZXh0Pgo8L3N2Zz4K" alt="行李箱帶示意圖" class="product-image" onclick="openModal(this.src)">
+                    <div class="product-content">
+                        <h3 class="product-title">行李箱帶 - 專業客製化服務</h3>
+                        <p class="product-description">讓您的行李箱在機場轉盤上一眼就能辨識！我們的全彩客製化行李束帶，採用最先進的熱昇華數位印刷技術，為您打造獨一無二的專屬設計。</p>
+                        <ul class="product-features">
+                            <li>全彩客製化設計，可印製照片、文字、Logo</li>
+                            <li>熱昇華數位印刷，顏色鮮豔持久不褪色</li>
+                            <li>高品質織帶材質，耐用且舒適</li>
+                            <li>快速扣具設計，方便使用</li>
+                            <li>適用於各種尺寸行李箱</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 圖片放大模態框 -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+
+    <script>
+        let products = [];
+
+        // 拖拽上傳功能
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const noImage = document.getElementById('noImage');
+
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.match('image.*')) {
+                alert('請選擇圖片檔案！');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                noImage.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addProduct() {
+            const title = document.getElementById('productTitle').value.trim();
+            const description = document.getElementById('productDescription').value.trim();
+            const imageSrc = imagePreview.src;
+
+            if (!title) {
+                alert('請輸入產品標題！');
+                return;
+            }
+
+            if (!description) {
+                alert('請輸入產品描述！');
+                return;
+            }
+
+            if (!imageSrc || imageSrc === '' || noImage.style.display !== 'none') {
+                alert('請選擇產品圖片！');
+                return;
+            }
+
+            const product = {
+                id: Date.now(),
+                title: title,
+                description: description,
+                image: imageSrc
+            };
+
+            products.push(product);
+            displayProduct(product);
+            clearForm();
+            showSuccessMessage();
+        }
+
+        function displayProduct(product) {
+            const productGallery = document.getElementById('productGallery');
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.title}" class="product-image" onclick="openModal('${product.image}')">
+                <div class="product-content">
+                    <h3 class="product-title">${product.title}</h3>
+                    <p class="product-description">${product.description}</p>
+                    <button class="delete-btn" onclick="deleteProduct(${product.id})">刪除產品</button>
+                </div>
+            `;
+            
+            productGallery.appendChild(productCard);
+        }
+
+        function clearForm() {
+            document.getElementById('productTitle').value = '';
+            document.getElementById('productDescription').value = '';
+            imagePreview.style.display = 'none';
+            noImage.style.display = 'flex';
+            imagePreview.src = '';
+            fileInput.value = '';
+        }
+
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function deleteProduct(productId) {
+            if (confirm('確定要刪除這個產品嗎？')) {
+                products = products.filter(p => p.id !== productId);
+                
+                // 重新渲染產品庫
+                const productGallery = document.getElementById('productGallery');
+                productGallery.innerHTML = `
+                    <div class="product-card">
+                        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjZjBmMmZmIi8+CjxyZWN0IHg9IjUwIiB5PSI3NSIgd2lkdGg9IjMwMCIgaGVpZ2h0PSIxMDAiIHJ4PSIxMCIgZmlsbD0iIzY2N2VlYSIvPgo8dGV4dCB4PSIyMDAiIHk9IjEzNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCI+5Lit5paH6KGM5p2O566x5bi2PC90ZXh0Pgo8L3N2Zz4K" alt="行李箱帶示意圖" class="product-image" onclick="openModal(this.src)">
+                        <div class="product-content">
+                            <h3 class="product-title">行李箱帶 - 專業客製化服務</h3>
+                            <p class="product-description">讓您的行李箱在機場轉盤上一眼就能辨識！我們的全彩客製化行李束帶，採用最先進的熱昇華數位印刷技術，為您打造獨一無二的專屬設計。</p>
+                            <ul class="product-features">
+                                <li>全彩客製化設計，可印製照片、文字、Logo</li>
+                                <li>熱昇華數位印刷，顏色鮮豔持久不褪色</li>
+                                <li>高品質織帶材質，耐用且舒適</li>
+                                <li>快速扣具設計，方便使用</li>
+                                <li>適用於各種尺寸行李箱</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                products.forEach(product => {
+                    displayProduct(product);
+                });
+            }
+        }
+
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+        }
+
+        // ESC 鍵關閉模態框
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
