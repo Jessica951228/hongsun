@@ -9,13 +9,15 @@ const app = express();
 
 // 中間件設定
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? 'https://your-app.onrender.com' : 'http://localhost:3000',
-    credentials: true
+    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://your-app.onrender.com' : 'http://localhost:3000'),
+    credentials: true,
+    methods: ['GET', 'POST', 'DELETE'],
+    allowedHeaders: ['Content-Type']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '.')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 // Session 設定
 app.use(session({
@@ -23,9 +25,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: process.env.NODE_ENV === 'production', // Render 使用 HTTPS
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax'
     }
 }));
 
@@ -106,14 +109,15 @@ function isAuthenticated(req, res, next) {
 // 路由：檢查登入狀態
 app.get('/check-auth', (req, res) => {
     console.log('檢查 /check-auth, isAuthenticated:', req.session.isAuthenticated);
-    res.json({ isAuthenticated: !!req.session.isAuthenticated });
+    res.json({ success: true, isAuthenticated: !!req.session.isAuthenticated });
 });
 
 // 路由：登入
 app.post('/login', (req, res) => {
+    console.log('登入請求，收到資料:', req.body);
     const { password } = req.body;
-    console.log('登入請求，密碼:', password);
     const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    console.log('比較密碼:', password, '與', adminPassword);
     if (password === adminPassword) {
         req.session.isAuthenticated = true;
         console.log('登入成功，Session:', req.session);
