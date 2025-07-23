@@ -3,46 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="宏尚網站"/>
-    <meta name="author" content="Jessica"/>
-    <meta name="keywords" content="宏尚,公司,織帶,客製化,訂購,網站,彰化,北斗,傳產,口罩"/>
-    <title>宏尚織帶 - 後台登入</title>
+    <title>後台登入 - 宏尚織帶</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .login-container { max-width: 400px; margin: 100px auto; padding: 20px; text-align: center; }
-        .login-container input { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; }
-        .login-container button { background: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .login-container button:hover { background: #45a049; }
-        #loginMessage { margin-top: 10px; color: red; }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .login-container h2 {
+            text-align: center;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .login-container button {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-container button:hover {
+            background: #45a049;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
-        <h1>宏尚織帶後台登入</h1>
+        <h2>後台登入</h2>
         <form id="loginForm">
-            <input type="password" name="password" placeholder="請輸入密碼" required>
+            <input type="password" id="password" name="password" placeholder="請輸入密碼" required>
             <button type="submit">登入</button>
         </form>
-        <div id="loginMessage"></div>
+        <p id="error" class="error"></p>
     </div>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const password = e.target.password.value;
+            const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('error');
+            
             try {
                 const response = await fetch('/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ password })
                 });
+                
                 const result = await response.json();
-                if (result.success) {
+                console.log('登入回應:', result);
+                
+                if (response.ok && result.success) {
                     window.location.href = '/admin.html';
                 } else {
-                    document.getElementById('loginMessage').innerText = result.message;
+                    errorElement.textContent = result.message || '登入失敗，請稍後再試';
                 }
             } catch (err) {
-                document.getElementById('loginMessage').innerText = '登入失敗，請稍後再試';
+                console.error('登入錯誤:', err);
+                errorElement.textContent = '無法連接到伺服器，請稍後再試';
             }
         });
     </script>
