@@ -117,8 +117,9 @@
                     throw new Error('無法檢查登入狀態');
                 }
                 const result = await response.json();
-                if (!result.success && result.message) {
-                    throw new Error(result.message);
+                console.log('檢查登入狀態回應:', result);
+                if (!result.success) {
+                    throw new Error(result.message || '檢查登入狀態失敗');
                 }
                 if (result.isAuthenticated) {
                     window.location.href = '/admin.html';
