@@ -9,41 +9,42 @@ const app = express();
 
 // 中間件設定
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: process.env.NODE_ENV === 'production' ? 'https://your-app.onrender.com' : 'http://localhost:3000',
     credentials: true
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('./'));
-app.use('/uploads', express.static('uploads'));
+app.use(express.static(path.join(__dirname, '.')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session 設定
 app.use(session({
-    secret: 'your-secret-key-2025-hongsun', // 更安全的隨機密鑰
+    secret: process.env.SESSION_SECRET || 'hongsun-secret-2025-secure',
     resave: false,
     saveUninitialized: false,
     cookie: { 
-        secure: false, // 本地測試設為 false，部署 HTTPS 設為 true
+        secure: process.env.NODE_ENV === 'production', // Render 使用 HTTPS
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // session 有效期 1 天
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
-// 診斷 session 中間件
+// 診斷 session
 app.use((req, res, next) => {
-    console.log(`請求路徑: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
+    console.log(`請求: ${req.method} ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
     next();
 });
 
 // 確保 uploads 資料夾存在
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
+const uploadsDir = path.join(__dirname, 'Uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
 }
 
-// 設定 multer 用於圖片上傳
+// 設定 multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, 'Uploads/');
     },
     filename: function (req, file, cb) {
         const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
@@ -63,11 +64,10 @@ const upload = multer({
     }
 });
 
-// 儲存產品的 JSON 檔案
+// 儲存產品
 const productsFile = path.join(__dirname, 'products.json');
 let products = [];
 
-// 初始化 products，確保為陣列
 try {
     if (fs.existsSync(productsFile)) {
         const data = fs.readFileSync(productsFile, 'utf-8');
@@ -95,7 +95,7 @@ function saveProducts() {
 
 // 中間件：檢查是否登入
 function isAuthenticated(req, res, next) {
-    console.log(`檢查 /admin.html 訪問, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
+    console.log(`檢查訪問: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
     if (req.session.isAuthenticated) {
         return next();
     }
@@ -105,17 +105,18 @@ function isAuthenticated(req, res, next) {
 
 // 路由：檢查登入狀態
 app.get('/check-auth', (req, res) => {
-    console.log('檢查登入狀態:', req.session.isAuthenticated);
+    console.log('檢查 /check-auth, isAuthenticated:', req.session.isAuthenticated);
     res.json({ isAuthenticated: !!req.session.isAuthenticated });
 });
 
 // 路由：登入
 app.post('/login', (req, res) => {
     const { password } = req.body;
-    console.log('收到登入請求，密碼:', password);
-    if (password === 'admin123') {
+    console.log('登入請求，密碼:', password);
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    if (password === adminPassword) {
         req.session.isAuthenticated = true;
-        console.log('登入成功，設置 session:', req.session);
+        console.log('登入成功，Session:', req.session);
         res.json({ success: true, message: '登入成功' });
     } else {
         console.log('密碼錯誤');
@@ -125,7 +126,7 @@ app.post('/login', (req, res) => {
 
 // 路由：登出
 app.post('/logout', (req, res) => {
-    console.log('收到登出請求，銷毀 session');
+    console.log('登出請求，銷毀 Session');
     req.session.destroy(() => {
         res.json({ success: true, message: '登出成功' });
     });
@@ -138,7 +139,7 @@ app.get('/', (req, res) => {
 
 // 路由：後台頁面
 app.get('/admin.html', isAuthenticated, (req, res) => {
-    console.log('訪問 /admin.html，session 狀態:', req.session.isAuthenticated);
+    console.log('訪問 /admin.html, isAuthenticated:', req.session.isAuthenticated);
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
@@ -226,7 +227,7 @@ app.delete('/products/:id', isAuthenticated, (req, res) => {
     saveProducts();
     
     if (deletedProduct.img) {
-        const imagePath = path.join(__dirname, 'uploads', deletedProduct.img);
+        const imagePath = path.join(__dirname, 'Uploads', deletedProduct.img);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);
         }
@@ -243,10 +244,10 @@ app.use((error, req, res, next) => {
 
 // 404 處理
 app.use((req, res) => {
-    res.status(404).json({ success: false, message: '找不到請求的資源: ' + req.originalUrl });
+    console.log(`404 錯誤: ${req.method} ${req.path}`);
+    res.status(404).json({ success: false, message: 'Not Found' });
 });
 
-// 啟動伺服器
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`伺服器已啟動，網址: http://localhost:${PORT}`);
