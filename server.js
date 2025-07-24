@@ -119,7 +119,7 @@ app.post('/add-product', isAuthenticated, (req, res) => {
             console.error(`[${new Date().toISOString()}] products 不是陣列，重新初始化`);
             products = [];
         }
-        products.push(product); // 累積商品
+        products.push(product);
         saveProducts();
         res.json({ success: true, message: '產品新增成功！', product: product });
     } catch (error) {
@@ -130,16 +130,20 @@ app.post('/add-product', isAuthenticated, (req, res) => {
 
 app.delete('/products/:id', isAuthenticated, (req, res) => {
     const productId = req.params.id;
+    console.log(`[${new Date().toISOString()}] 嘗試刪除產品，ID: ${productId}, 當前 products 數量: ${products.length}`); // 調試
     const productIndex = products.findIndex(p => p.id === productId);
     if (productIndex === -1) {
+        console.log(`[${new Date().toISOString()}] 找不到產品 ID: ${productId}`);
         return res.status(404).json({ success: false, message: '找不到該產品' });
     }
     const deletedProduct = products.splice(productIndex, 1)[0];
+    console.log(`[${new Date().toISOString()}] 成功刪除產品: ${deletedProduct.name}, 剩餘數量: ${products.length}`); // 調試
     saveProducts();
     if (deletedProduct.img) {
         const imagePath = path.join(__dirname, 'Uploads', deletedProduct.img);
         if (fs.existsSync(imagePath)) {
             fs.unlinkSync(imagePath);
+            console.log(`[${new Date().toISOString()}] 刪除圖片: ${imagePath}`);
         }
     }
     res.json({ success: true, message: '產品刪除成功', deletedProduct });
@@ -203,7 +207,7 @@ try {
 
 function saveProducts() {
     try {
-        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2)); // 確保保存所有產品
+        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
         console.log(`[${new Date().toISOString()}] 成功儲存 products.json，商品數: ${products.length}`);
     } catch (err) {
         console.error(`[${new Date().toISOString()}] 儲存 products.json 失敗: ${err.message}`);

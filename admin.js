@@ -108,13 +108,13 @@ document.getElementById('addProductForm').image.addEventListener('change', funct
     }
 });
 
-// 載入產品列表（更新為 index5.html 風格）
+// 載入產品列表
 async function loadProducts() {
     try {
         const response = await fetch('/products');
         if (!response.ok) throw new Error('無法載入商品');
         const data = await response.json();
-        const productGrid = document.getElementById('productGrid') || document.getElementById('productList'); // 兼容 admin.html 和 index5.html
+        const productGrid = document.getElementById('productGrid') || document.getElementById('productList');
         productGrid.innerHTML = '';
         data.products.forEach(product => {
             const div = document.createElement('div');
@@ -122,7 +122,7 @@ async function loadProducts() {
             div.dataset.id = product.id;
             div.innerHTML = `
                 <img src="/uploads/${product.img}" alt="${product.name}">
-                <button>了解更多</button>
+                <button onclick="deleteProduct('${product.id}')">刪除</button>
             `;
             productGrid.appendChild(div);
         });
@@ -131,21 +131,28 @@ async function loadProducts() {
     }
 }
 
-// 刪除產品
+// 刪除產品（修正）
 async function deleteProduct(id) {
     if (!confirm('確定要刪除此商品？')) return;
+    const sessionId = localStorage.getItem('sessionId');
+    console.log(`[${new Date().toISOString()}] 嘗試刪除產品，ID: ${id}, Session ID: ${sessionId}`); // 調試
     try {
         const response = await fetch(`/products/${id}`, {
             method: 'DELETE',
             headers: {
-                'x-session-id': localStorage.getItem('sessionId')
+                'x-session-id': sessionId
             }
         });
-        if (!response.ok) throw new Error('刪除失敗');
-        document.getElementById('message').innerText = '商品刪除成功！';
+        if (!response.ok) {
+            const errorResult = await response.json();
+            throw new Error(errorResult.message || `刪除失敗 (${response.status})`);
+        }
+        const data = await response.json();
+        document.getElementById('message').innerText = data.message || '商品刪除成功！';
         document.getElementById('message').style.color = 'green';
         loadProducts();
     } catch (err) {
+        console.error('刪除錯誤:', err);
         document.getElementById('message').innerText = '錯誤: ' + err.message;
         document.getElementById('message').style.color = 'red';
     }
