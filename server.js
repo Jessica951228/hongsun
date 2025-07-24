@@ -54,6 +54,45 @@ const upload = multer({
     }
 });
 
+// 中間件：檢查是否登入
+function isAuthenticated(req, res, next) {
+    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
+    if (req.session.isAuthenticated) {
+        return next();
+    }
+    res.status(401).json({ success: false, message: '未登入' });
+}
+
+// 儲存產品
+const productsFile = path.join(__dirname, 'products.json');
+let products = [];
+
+try {
+    if (fs.existsSync(productsFile)) {
+        const data = fs.readFileSync(productsFile, 'utf-8');
+        const parsed = JSON.parse(data);
+        products = Array.isArray(parsed) ? parsed : [];
+        console.log(`[${new Date().toISOString()}] 成功載入 products.json，商品數: ${products.length}`);
+    } else {
+        console.log(`[${new Date().toISOString()}] products.json 不存在，初始化空陣列`);
+        products = [];
+        fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
+    }
+} catch (err) {
+    console.error(`[${new Date().toISOString()}] 載入 products.json 失敗: ${err.message}，初始化空陣列`);
+    products = [];
+    fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
+}
+
+function saveProducts() {
+    try {
+        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
+        console.log(`[${new Date().toISOString()}] 成功儲存 products.json，商品數: ${products.length}`);
+    } catch (err) {
+        console.error(`[${new Date().toISOString()}] 儲存 products.json 失敗: ${err.message}`);
+    }
+}
+
 // 定義 API 路由
 app.get('/check-auth', (req, res) => {
     console.log(`[${new Date().toISOString()}] 檢查 /check-auth, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
@@ -100,14 +139,13 @@ app.get('/products/:id', (req, res) => {
 
 app.post('/add-product', isAuthenticated, (req, res) => {
     try {
-        const { name, price, img, description, minOrder, productionTime, shopeeLink } = req.body;
-        if (!name || !price || !img) {
-            return res.status(400).json({ success: false, message: '產品名稱、價格和圖片為必填' });
+        const { name, img, description, minOrder, productionTime, shopeeLink } = req.body;
+        if (!name || !img) {
+            return res.status(400).json({ success: false, message: '產品名稱和圖片為必填' });
         }
         const product = {
             id: Date.now().toString(),
             name: name.trim(),
-            price: parseFloat(price),
             img: img,
             description: description ? description.trim() : '',
             minOrder: minOrder || '',
@@ -130,14 +168,14 @@ app.post('/add-product', isAuthenticated, (req, res) => {
 
 app.delete('/products/:id', isAuthenticated, (req, res) => {
     const productId = req.params.id;
-    console.log(`[${new Date().toISOString()}] 嘗試刪除產品，ID: ${productId}, 當前 products 數量: ${products.length}`); // 調試
+    console.log(`[${new Date().toISOString()}] 嘗試刪除產品，ID: ${productId}, 當前 products 數量: ${products.length}`);
     const productIndex = products.findIndex(p => p.id === productId);
     if (productIndex === -1) {
         console.log(`[${new Date().toISOString()}] 找不到產品 ID: ${productId}`);
         return res.status(404).json({ success: false, message: '找不到該產品' });
     }
     const deletedProduct = products.splice(productIndex, 1)[0];
-    console.log(`[${new Date().toISOString()}] 成功刪除產品: ${deletedProduct.name}, 剩餘數量: ${products.length}`); // 調試
+    console.log(`[${new Date().toISOString()}] 成功刪除產品: ${deletedProduct.name}, 剩餘數量: ${products.length}`);
     saveProducts();
     if (deletedProduct.img) {
         const imagePath = path.join(__dirname, 'Uploads', deletedProduct.img);
@@ -176,44 +214,17 @@ app.get('/admin.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-// 中間件：檢查是否登入
-function isAuthenticated(req, res, next) {
-    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
-    if (req.session.isAuthenticated) {
-        return next();
-    }
-    res.status(401).json({ success: false, message: '未登入' });
-}
-
-// 儲存產品
-const productsFile = path.join(__dirname, 'products.json');
-let products = [];
-
-try {
+// 下載 products.json
+app.get('/download-products', (req, res) => {
+    const productsFile = path.join(__dirname, 'products.json');
     if (fs.existsSync(productsFile)) {
-        const data = fs.readFileSync(productsFile, 'utf-8');
-        const parsed = JSON.parse(data);
-        products = Array.isArray(parsed) ? parsed : [];
-        console.log(`[${new Date().toISOString()}] 成功載入 products.json，商品數: ${products.length}`);
+        res.setHeader('Content-Disposition', 'attachment; filename=products.json');
+        res.setHeader('Content-Type', 'application/json');
+        res.sendFile(productsFile);
     } else {
-        console.log(`[${new Date().toISOString()}] products.json 不存在，初始化空陣列`);
-        products = [];
-        fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
+        res.status(404).json({ success: false, message: '文件不存在' });
     }
-} catch (err) {
-    console.error(`[${new Date().toISOString()}] 載入 products.json 失敗: ${err.message}，初始化空陣列`);
-    products = [];
-    fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
-}
-
-function saveProducts() {
-    try {
-        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
-        console.log(`[${new Date().toISOString()}] 成功儲存 products.json，商品數: ${products.length}`);
-    } catch (err) {
-        console.error(`[${new Date().toISOString()}] 儲存 products.json 失敗: ${err.message}`);
-    }
-}
+});
 
 // 錯誤處理中間件
 app.use((error, req, res, next) => {
@@ -227,18 +238,8 @@ app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Not Found' });
 });
 
+// 啟動伺服器
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`[${new Date().toISOString()}] 伺服器已啟動，網址: http://localhost:${PORT}`);
-});
-
-app.get('/download-products', (req, res) => {
-    const productsFile = path.join(__dirname, 'products.json');
-    if (fs.existsSync(productsFile)) {
-        res.setHeader('Content-Disposition', 'attachment; filename=products.json');
-        res.setHeader('Content-Type', 'application/json');
-        res.sendFile(productsFile);
-    } else {
-        res.status(404).json({ success: false, message: '文件不存在' });
-    }
 });
