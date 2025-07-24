@@ -1,25 +1,3 @@
-// 登入邏輯（新增）
-document.getElementById('loginButton').addEventListener('click', async () => {
-    const password = document.getElementById('passwordInput').value;
-    try {
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        const sessionId = response.headers.get('x-session-id');
-        if (sessionId) {
-            localStorage.setItem('sessionId', sessionId); // 儲存 Session ID
-            alert('登入成功');
-        }
-        const data = await response.json();
-        if (!data.success) throw new Error(data.message);
-    } catch (err) {
-        console.error('登入失敗:', err);
-        alert('登入失敗: ' + err.message);
-    }
-});
-
 // 上傳邏輯（修正）
 document.getElementById('addProductForm').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -41,8 +19,7 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
         const imageRes = await fetch('/upload-image', {
             method: 'POST',
             headers: {
-                'x-session-id': localStorage.getItem('sessionId'), // 添加 Session ID
-                'Content-Type': 'multipart/form-data'
+                'x-session-id': localStorage.getItem('sessionId') // 只傳遞 Session ID
             },
             body: formData
         });
@@ -66,7 +43,7 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-session-id': localStorage.getItem('sessionId') // 添加 Session ID
+                'x-session-id': localStorage.getItem('sessionId')
             },
             body: JSON.stringify(productData)
         });
@@ -89,7 +66,7 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
     }
 });
 
-// 圖片預覽邏輯（未變更）
+// 保留其他未變更的函數（圖片預覽、載入產品列表、刪除產品）
 document.getElementById('addProductForm').image.addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (file) {
@@ -103,7 +80,6 @@ document.getElementById('addProductForm').image.addEventListener('change', funct
     }
 });
 
-// 載入產品列表（未變更）
 async function loadProducts() {
     try {
         const response = await fetch('/products');
@@ -130,14 +106,13 @@ async function loadProducts() {
     }
 }
 
-// 刪除產品（修正，添加 Session ID）
 async function deleteProduct(id) {
     if (!confirm('確定要刪除此商品？')) return;
     try {
         const response = await fetch(`/products/${id}`, {
             method: 'DELETE',
             headers: {
-                'x-session-id': localStorage.getItem('sessionId') // 添加 Session ID
+                'x-session-id': localStorage.getItem('sessionId')
             }
         });
         if (!response.ok) throw new Error('刪除失敗');
