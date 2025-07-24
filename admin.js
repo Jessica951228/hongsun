@@ -13,7 +13,6 @@ document.getElementById('loginButton').addEventListener('click', async () => {
             console.log('登入成功，Session ID:', sessionId);
             alert('登入成功');
         } else {
-            console.log('未獲取到 Session ID');
             throw new Error('未獲取到 Session ID');
         }
         const data = await response.json();
@@ -24,7 +23,7 @@ document.getElementById('loginButton').addEventListener('click', async () => {
     }
 });
 
-// 上傳邏輯（修正）
+// 上傳產品邏輯（已移除價格欄位）
 document.getElementById('addProductForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const form = e.target;
@@ -87,7 +86,7 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
         loadProducts();
     } catch (err) {
         console.error('錯誤:', err);
-        document.getElementById('message').innerText = '錯誤: ' + (err.message.includes('push is not a function') ? '伺服器資料格式錯誤，請聯繫管理員' : err.message);
+        document.getElementById('message').innerText = '錯誤: ' + err.message;
         document.getElementById('message').style.color = 'red';
         submitBtn.disabled = false;
     }
@@ -107,7 +106,7 @@ document.getElementById('addProductForm').image.addEventListener('change', funct
     }
 });
 
-// 載入產品列表
+// 載入產品列表（移除價格顯示）
 async function loadProducts() {
     try {
         const response = await fetch('/products');
@@ -121,6 +120,8 @@ async function loadProducts() {
             div.dataset.id = product.id;
             div.innerHTML = `
                 <img src="/uploads/${product.img}" alt="${product.name}">
+                <p>${product.name}</p>
+                <p>${product.description || ''}</p>
                 <button onclick="deleteProduct('${product.id}')">刪除</button>
             `;
             productGrid.appendChild(div);
@@ -130,11 +131,10 @@ async function loadProducts() {
     }
 }
 
-// 刪除產品（修正）
+// 刪除產品
 async function deleteProduct(id) {
     if (!confirm('確定要刪除此商品？')) return;
     const sessionId = localStorage.getItem('sessionId');
-    console.log(`[${new Date().toISOString()}] 嘗試刪除產品，ID: ${id}, Session ID: ${sessionId}`); // 調試
     try {
         const response = await fetch(`/products/${id}`, {
             method: 'DELETE',
