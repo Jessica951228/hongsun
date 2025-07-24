@@ -103,65 +103,6 @@
       productionTime: "7-10個工作天",
       shopeeLink: "https://reurl.cc/QY84kq"
     },
-    {
-      id: 4,
-      name: "袖套",
-      img: "arm-cover.png",
-      description: "防曬袖套，夏日必備配件",
-      detailedDescription: `
-        <h2>袖套 - 夏日防曬首選</h2>
-        <p>採用涼感材質製作，提供優異的防曬效果，同時保持透氣舒適。適合戶外工作、運動、騎車使用。</p>
-        
-        <h3>產品特色</h3>
-        <ul>
-          <li>UPF50+防曬係數</li>
-          <li>涼感材質</li>
-          <li>彈性佳，不緊繃</li>
-          <li>快乾透氣</li>
-          <li>可機洗</li>
-        </ul>
-        
-        <h3>規格說明</h3>
-        <ul>
-          <li>材質：涼感聚酯纖維</li>
-          <li>尺寸：均碼（彈性設計）</li>
-          <li>顏色：多色可選</li>
-          <li>防曬係數：UPF50+</li>
-        </ul>
-      `,
-      minOrder: "20雙起訂",
-      productionTime: "5-7個工作天",
-      shopeeLink: "https://reurl.cc/3KdOE9"
-    },
-    {
-      id: 5,
-      name: "腕帶",
-      img: "wristband.png",
-      description: "運動腕帶，吸汗透氣",
-      detailedDescription: `
-        <h2>腕帶 - 運動必備配件</h2>
-        <p>專為運動設計的腕帶，具有優異的吸汗效果，讓您在運動時保持乾爽舒適。可客製化印製團隊Logo或個人圖案。</p>
-        
-        <h3>產品特色</h3>
-        <ul>
-          <li>吸汗快乾</li>
-          <li>彈性佳</li>
-          <li>可客製化印刷</li>
-          <li>耐洗耐用</li>
-          <li>多色可選</li>
-        </ul>
-        
-        <h3>規格說明</h3>
-        <ul>
-          <li>材質：毛巾布</li>
-          <li>尺寸：8cm x 8cm</li>
-          <li>厚度：適中</li>
-          <li>顏色：多色可選</li>
-        </ul>
-      `,
-      minOrder: "50個起訂",
-      productionTime: "7-10個工作天",
-      shopeeLink: "https://reurl.cc/knGler"
-    }
+    
   ];  
 

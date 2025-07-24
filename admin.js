@@ -62,7 +62,6 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
 
         const productData = {
             name: form.name.value,
-            price: form.price.value,
             img: imageResult.filename,
             description: form.description.value
         };
