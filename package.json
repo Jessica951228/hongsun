@@ -21,9 +21,6 @@
   "dependencies": {
     "cors": "2.8.5",
     "express": "4.21.2",
-    "express-session": "1.18.2",
-    "multer": "2.0.2",
-    "connect-redis": "^7.0.0",
-    "ioredis": "^4.6.5"
+    "multer": "2.0.2"
   }
 }
