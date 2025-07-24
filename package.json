@@ -24,6 +24,6 @@
     "express-session": "1.18.2",
     "multer": "2.0.2",
     "connect-redis": "^7.0.0",
-    "redis": "^4.6.5"
+    "ioredis": "^4.6.5"
   }
 }
