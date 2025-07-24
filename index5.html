@@ -87,7 +87,6 @@
                 if (!data.success) throw new Error(data.message || '載入商品失敗');
                 const dynamicProducts = document.getElementById('dynamic-products');
                 dynamicProducts.innerHTML = '';
-
                 data.products.forEach(product => {
                     const div = document.createElement('div');
                     div.className = 'product-item';
@@ -136,6 +135,8 @@
 
         loadDynamicProducts();
     </script>
+    <script src="product-data.js"></script>
+    <script src="product-detail.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

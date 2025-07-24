@@ -9,15 +9,13 @@ const app = express();
 
 // 中間件設定
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://your-app.onrender.com' : 'http://localhost:3000'),
+    origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://hongsunweb.onrender.com' : 'http://localhost:3000'),
     credentials: true,
     methods: ['GET', 'POST', 'DELETE'],
     allowedHeaders: ['Content-Type']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, '.')));
-app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 // Session 設定
 app.use(session({
@@ -37,6 +35,127 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] 請求: ${req.method} ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}, Body: ${JSON.stringify(req.body)}`);
     next();
 });
+
+// 定義 API 路由（優先於靜態檔案）
+app.get('/check-auth', (req, res) => {
+    console.log(`[${new Date().toISOString()}] 檢查 /check-auth, isAuthenticated: ${req.session.isAuthenticated}`);
+    res.json({ success: true, isAuthenticated: !!req.session.isAuthenticated });
+});
+
+app.post('/login', (req, res) => {
+    console.log(`[${new Date().toISOString()}] 登入請求，收到資料: ${JSON.stringify(req.body)}`);
+    const { password } = req.body;
+    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    console.log(`[${new Date().toISOString()}] 比較密碼: ${password} 與 ${adminPassword}`);
+    if (password && password === adminPassword) {
+        req.session.isAuthenticated = true;
+        console.log(`[${new Date().toISOString()}] 登入成功，Session: ${JSON.stringify(req.session)}`);
+        res.json({ success: true, message: '登入成功' });
+    } else {
+        console.log(`[${new Date().toISOString()}] 密碼錯誤`);
+        res.status(401).json({ success: false, message: '密碼錯誤' });
+    }
+});
+
+app.post('/logout', (req, res) => {
+    console.log(`[${new Date().toISOString()}] 登出請求，銷毀 Session`);
+    req.session.destroy(() => {
+        res.json({ success: true, message: '登出成功' });
+    });
+});
+
+app.get('/products', (req, res) => {
+    res.json({ success: true, products: products, total: products.length });
+});
+
+app.get('/products/:id', (req, res) => {
+    const productId = req.params.id;
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        return res.status(404).json({ success: false, message: '找不到該產品' });
+    }
+    res.json({ success: true, product: product });
+});
+
+app.post('/add-product', isAuthenticated, (req, res) => {
+    try {
+        const { name, price, img, description } = req.body;
+        if (!name || !price || !img) {
+            return res.status(400).json({ success: false, message: '產品名稱、價格和圖片為必填' });
+        }
+        const product = {
+            id: Date.now().toString(),
+            name: name.trim(),
+            price: parseFloat(price),
+            img: img,
+            description: description ? description.trim() : '',
+            createdAt: new Date().toISOString()
+        };
+        if (!Array.isArray(products)) {
+            console.error(`[${new Date().toISOString()}] products 不是陣列，重新初始化`);
+            products = [];
+        }
+        products.push(product);
+        saveProducts();
+        res.json({ success: true, message: '產品新增成功！', product: product });
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] 新增產品錯誤: ${error}`);
+        res.status(500).json({ success: false, message: '新增產品失敗: ' + error.message });
+    }
+});
+
+app.delete('/products/:id', isAuthenticated, (req, res) => {
+    const productId = req.params.id;
+    const productIndex = products.findIndex(p => p.id === productId);
+    if (productIndex === -1) {
+        return res.status(404).json({ success: false, message: '找不到該產品' });
+    }
+    const deletedProduct = products.splice(productIndex, 1)[0];
+    saveProducts();
+    if (deletedProduct.img) {
+        const imagePath = path.join(__dirname, 'Uploads', deletedProduct.img);
+        if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+        }
+    }
+    res.json({ success: true, message: '產品刪除成功', deletedProduct });
+});
+
+app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: '沒有上傳檔案' });
+        }
+        res.json({ success: true, message: '圖片上傳成功', filename: req.file.filename, url: `/uploads/${req.file.filename}` });
+    } catch (error) {
+        console.error(`[${new Date().toISOString()}] 圖片上傳錯誤: ${error}`);
+        res.status(500).json({ success: false, message: '圖片上傳失敗: ' + error.message });
+    }
+});
+
+// 靜態檔案服務（放在 API 路由後）
+app.use(express.static(path.join(__dirname, '.')));
+app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
+
+// 動態路由
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index5.html'));
+});
+
+app.get('/admin.html', isAuthenticated, (req, res) => {
+    console.log(`[${new Date().toISOString()}] 訪問 /admin.html, isAuthenticated: ${req.session.isAuthenticated}`);
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// 中間件：檢查是否登入
+function isAuthenticated(req, res, next) {
+    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
+    if (req.session.isAuthenticated) {
+        return next();
+    }
+    console.log(`[${new Date().toISOString()}] 未登入，重定向到 /login.html`);
+    res.redirect('/login.html');
+}
 
 // 確保 uploads 資料夾存在
 const uploadsDir = path.join(__dirname, 'Uploads');
@@ -96,150 +215,6 @@ function saveProducts() {
     }
 }
 
-// 中間件：檢查是否登入
-function isAuthenticated(req, res, next) {
-    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.sessionID}, isAuthenticated: ${req.session.isAuthenticated}`);
-    if (req.session.isAuthenticated) {
-        return next();
-    }
-    console.log(`[${new Date().toISOString()}] 未登入，重定向到 /login.html`);
-    res.redirect('/login.html');
-}
-
-// 路由：檢查登入狀態
-app.get('/check-auth', (req, res) => {
-    console.log(`[${new Date().toISOString()}] 檢查 /check-auth, isAuthenticated: ${req.session.isAuthenticated}`);
-    res.json({ success: true, isAuthenticated: !!req.session.isAuthenticated });
-});
-
-// 路由：登入
-app.post('/login', (req, res) => {
-    console.log(`[${new Date().toISOString()}] 登入請求，收到資料: ${JSON.stringify(req.body)}`);
-    const { password } = req.body;
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-    console.log(`[${new Date().toISOString()}] 比較密碼: ${password} 與 ${adminPassword}`);
-    if (password && password === adminPassword) {
-        req.session.isAuthenticated = true;
-        console.log(`[${new Date().toISOString()}] 登入成功，Session: ${JSON.stringify(req.session)}`);
-        res.json({ success: true, message: '登入成功' });
-    } else {
-        console.log(`[${new Date().toISOString()}] 密碼錯誤`);
-        res.status(401).json({ success: false, message: '密碼錯誤' });
-    }
-});
-
-// 路由：登出
-app.post('/logout', (req, res) => {
-    console.log(`[${new Date().toISOString()}] 登出請求，銷毀 Session`);
-    req.session.destroy(() => {
-        res.json({ success: true, message: '登出成功' });
-    });
-});
-
-// 路由：首頁
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index5.html'));
-});
-
-// 路由：後台頁面
-app.get('/admin.html', isAuthenticated, (req, res) => {
-    console.log(`[${new Date().toISOString()}] 訪問 /admin.html, isAuthenticated: ${req.session.isAuthenticated}`);
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-// 路由：圖片上傳
-app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: '沒有上傳檔案' });
-        }
-        res.json({ 
-            success: true,
-            message: '圖片上傳成功',
-            filename: req.file.filename,
-            url: `/uploads/${req.file.filename}`
-        });
-    } catch (error) {
-        console.error(`[${new Date().toISOString()}] 圖片上傳錯誤: ${error}`);
-        res.status(500).json({ success: false, message: '圖片上傳失敗: ' + error.message });
-    }
-});
-
-// 路由：新增產品
-app.post('/add-product', isAuthenticated, (req, res) => {
-    try {
-        const { name, price, img, description } = req.body;
-        if (!name || !price || !img) {
-            return res.status(400).json({ success: false, message: '產品名稱、價格和圖片為必填' });
-        }
-        
-        const product = {
-            id: Date.now().toString(),
-            name: name.trim(),
-            price: parseFloat(price),
-            img: img,
-            description: description ? description.trim() : '',
-            createdAt: new Date().toISOString()
-        };
-        
-        if (!Array.isArray(products)) {
-            console.error(`[${new Date().toISOString()}] products 不是陣列，重新初始化`);
-            products = [];
-        }
-        
-        products.push(product);
-        saveProducts();
-        
-        res.json({ 
-            success: true,
-            message: '產品新增成功！',
-            product: product
-        });
-    } catch (error) {
-        console.error(`[${new Date().toISOString()}] 新增產品錯誤: ${error}`);
-        res.status(500).json({ success: false, message: '新增產品失敗: ' + error.message });
-    }
-});
-
-// 路由：取得所有產品
-app.get('/products', (req, res) => {
-    res.json({ success: true, products: products, total: products.length });
-});
-
-// 路由：根據 ID 取得單一產品
-app.get('/products/:id', (req, res) => {
-    const productId = req.params.id;
-    const product = products.find(p => p.id === productId);
-    
-    if (!product) {
-        return res.status(404).json({ success: false, message: '找不到該產品' });
-    }
-    
-    res.json({ success: true, product: product });
-});
-
-// 路由：刪除產品
-app.delete('/products/:id', isAuthenticated, (req, res) => {
-    const productId = req.params.id;
-    const productIndex = products.findIndex(p => p.id === productId);
-    
-    if (productIndex === -1) {
-        return res.status(404).json({ success: false, message: '找不到該產品' });
-    }
-    
-    const deletedProduct = products.splice(productIndex, 1)[0];
-    saveProducts();
-    
-    if (deletedProduct.img) {
-        const imagePath = path.join(__dirname, 'Uploads', deletedProduct.img);
-        if (fs.existsSync(imagePath)) {
-            fs.unlinkSync(imagePath);
-        }
-    }
-    
-    res.json({ success: true, message: '產品刪除成功', deletedProduct });
-});
-
 // 錯誤處理中間件
 app.use((error, req, res, next) => {
     console.error(`[${new Date().toISOString()}] 伺服器錯誤: ${error}`);
@@ -252,7 +227,7 @@ app.use((req, res) => {
     res.status(404).json({ success: false, message: 'Not Found' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`[${new Date().toISOString()}] 伺服器已啟動，網址: http://localhost:${PORT}`);
 });
