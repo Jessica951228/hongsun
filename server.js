@@ -231,3 +231,14 @@ const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
     console.log(`[${new Date().toISOString()}] 伺服器已啟動，網址: http://localhost:${PORT}`);
 });
+
+app.get('/download-products', (req, res) => {
+    const productsFile = path.join(__dirname, 'products.json');
+    if (fs.existsSync(productsFile)) {
+        res.setHeader('Content-Disposition', 'attachment; filename=products.json');
+        res.setHeader('Content-Type', 'application/json');
+        res.sendFile(productsFile);
+    } else {
+        res.status(404).json({ success: false, message: '文件不存在' });
+    }
+});
