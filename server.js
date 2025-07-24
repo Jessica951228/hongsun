@@ -1,4 +1,3 @@
-
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -8,7 +7,7 @@ const cors = require('cors');
 const app = express();
 
 // 簡化 Session，使用內存
-const sessions = {}; // 簡單的內存 Session 儲存
+const sessions = {};
 app.use((req, res, next) => {
     const sessionId = req.headers['x-session-id'] || 'none';
     req.session = sessions[sessionId] || { isAuthenticated: false };
@@ -69,7 +68,7 @@ app.post('/login', (req, res) => {
     if (password && password === adminPassword) {
         sessions[sessionId] = { isAuthenticated: true };
         res.set('x-session-id', sessionId);
-        console.log(`[${new Date().toISOString()}] 登入成功，Session ID: ${sessionId}`);
+        console.log(`[${new Date().toISOString()}] 登入成功，設置 Session ID: ${sessionId}`);
         res.json({ success: true, message: '登入成功' });
     } else {
         console.log(`[${new Date().toISOString()}] 密碼錯誤`);
@@ -120,7 +119,7 @@ app.post('/add-product', isAuthenticated, (req, res) => {
             console.error(`[${new Date().toISOString()}] products 不是陣列，重新初始化`);
             products = [];
         }
-        products.push(product);
+        products.push(product); // 累積商品
         saveProducts();
         res.json({ success: true, message: '產品新增成功！', product: product });
     } catch (error) {
@@ -204,7 +203,7 @@ try {
 
 function saveProducts() {
     try {
-        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2));
+        fs.writeFileSync(productsFile, JSON.stringify(products, null, 2)); // 確保保存所有產品
         console.log(`[${new Date().toISOString()}] 成功儲存 products.json，商品數: ${products.length}`);
     } catch (err) {
         console.error(`[${new Date().toISOString()}] 儲存 products.json 失敗: ${err.message}`);
