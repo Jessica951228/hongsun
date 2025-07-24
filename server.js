@@ -196,11 +196,12 @@ try {
         products = Array.isArray(parsed) ? parsed : [];
         console.log(`[${new Date().toISOString()}] 成功載入 products.json，商品數: ${products.length}`);
     } else {
+        console.log(`[${new Date().toISOString()}] products.json 不存在，初始化空陣列`);
+        products = [];
         fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
-        console.log(`[${new Date().toISOString()}] 創建新的 products.json`);
     }
 } catch (err) {
-    console.error(`[${new Date().toISOString()}] 載入 products.json 失敗: ${err.message}`);
+    console.error(`[${new Date().toISOString()}] 載入 products.json 失敗: ${err.message}，初始化空陣列`);
     products = [];
     fs.writeFileSync(productsFile, JSON.stringify([], null, 2));
 }
