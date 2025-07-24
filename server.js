@@ -36,6 +36,35 @@ app.use((req, res, next) => {
     next();
 });
 
+// 確保 uploads 資料夾存在
+const uploadsDir = path.join(__dirname, 'Uploads');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir);
+}
+
+// 設定 multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'Uploads/');
+    },
+    filename: function (req, file, cb) {
+        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('只允許上傳圖片檔案!'), false);
+        }
+    }
+});
+
 // 定義 API 路由（優先於靜態檔案）
 app.get('/check-auth', (req, res) => {
     console.log(`[${new Date().toISOString()}] 檢查 /check-auth, isAuthenticated: ${req.session.isAuthenticated}`);
@@ -156,35 +185,6 @@ function isAuthenticated(req, res, next) {
     console.log(`[${new Date().toISOString()}] 未登入，重定向到 /login.html`);
     res.redirect('/login.html');
 }
-
-// 確保 uploads 資料夾存在
-const uploadsDir = path.join(__dirname, 'Uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
-
-// 設定 multer
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'Uploads/');
-    },
-    filename: function (req, file, cb) {
-        const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-        cb(null, uniqueName);
-    }
-});
-
-const upload = multer({ 
-    storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('只允許上傳圖片檔案!'), false);
-        }
-    }
-});
 
 // 儲存產品
 const productsFile = path.join(__dirname, 'products.json');
