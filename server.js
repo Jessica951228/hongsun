@@ -1,3 +1,4 @@
+
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
@@ -100,9 +101,9 @@ app.get('/products/:id', (req, res) => {
 
 app.post('/add-product', isAuthenticated, (req, res) => {
     try {
-        const { name, price, img, description } = req.body;
+        const { name, price, img, description, minOrder, productionTime, shopeeLink } = req.body;
         if (!name || !price || !img) {
-            return res.status(400).json({ success: false, message: '產品名稱、價格和圖片為必填' }); // 修正狀態碼 404 -> 400
+            return res.status(400).json({ success: false, message: '產品名稱、價格和圖片為必填' });
         }
         const product = {
             id: Date.now().toString(),
@@ -110,6 +111,9 @@ app.post('/add-product', isAuthenticated, (req, res) => {
             price: parseFloat(price),
             img: img,
             description: description ? description.trim() : '',
+            minOrder: minOrder || '',
+            productionTime: productionTime || '',
+            shopeeLink: shopeeLink || '',
             createdAt: new Date().toISOString()
         };
         if (!Array.isArray(products)) {

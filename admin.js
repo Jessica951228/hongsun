@@ -9,11 +9,11 @@ document.getElementById('loginButton').addEventListener('click', async () => {
         });
         const sessionId = response.headers.get('x-session-id');
         if (sessionId) {
-            localStorage.setItem('sessionId', sessionId); // 儲存 Session ID
-            console.log('登入成功，Session ID:', sessionId); // 調試
+            localStorage.setItem('sessionId', sessionId);
+            console.log('登入成功，Session ID:', sessionId);
             alert('登入成功');
         } else {
-            console.log('未獲取到 Session ID'); // 調試
+            console.log('未獲取到 Session ID');
             throw new Error('未獲取到 Session ID');
         }
         const data = await response.json();
@@ -41,13 +41,13 @@ document.getElementById('addProductForm').addEventListener('submit', async funct
 
     formData.append('image', form.image.files[0]);
     const sessionId = localStorage.getItem('sessionId');
-    console.log('上傳請求，Session ID:', sessionId); // 調試
+    console.log('上傳請求，Session ID:', sessionId);
 
     try {
         const imageRes = await fetch('/upload-image', {
             method: 'POST',
             headers: {
-                'x-session-id': sessionId // 只傳遞 Session ID
+                'x-session-id': sessionId
             },
             body: formData
         });
@@ -108,27 +108,23 @@ document.getElementById('addProductForm').image.addEventListener('change', funct
     }
 });
 
-// 載入產品列表
+// 載入產品列表（更新為 index5.html 風格）
 async function loadProducts() {
     try {
         const response = await fetch('/products');
         if (!response.ok) throw new Error('無法載入商品');
         const data = await response.json();
-        const productList = document.getElementById('productList');
-        productList.innerHTML = '';
+        const productGrid = document.getElementById('productGrid') || document.getElementById('productList'); // 兼容 admin.html 和 index5.html
+        productGrid.innerHTML = '';
         data.products.forEach(product => {
             const div = document.createElement('div');
-            div.className = 'product-preview';
+            div.className = 'product-item';
+            div.dataset.id = product.id;
             div.innerHTML = `
                 <img src="/uploads/${product.img}" alt="${product.name}">
-                <div>
-                    <p><strong>${product.name}</strong></p>
-                    <p>價格: ${product.price} 元</p>
-                    <p>${product.description}</p>
-                    <button onclick="deleteProduct('${product.id}')">刪除</button>
-                </div>
+                <button>了解更多</button>
             `;
-            productList.appendChild(div);
+            productGrid.appendChild(div);
         });
     } catch (err) {
         console.error('載入商品錯誤:', err);
