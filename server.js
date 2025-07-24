@@ -70,7 +70,7 @@ const express = require('express');
              console.log(`[${new Date().toISOString()}] 登入成功，Session ID: ${sessionId}`);
              res.json({ success: true, message: '登入成功' });
          } else {
-             console.log(`[${new Date().toISOString()]] 密碼錯誤`);
+             console.log(`[${new Date().toISOString()}] 密碼錯誤`);
              res.status(401).json({ success: false, message: '密碼錯誤' });
          }
      });
