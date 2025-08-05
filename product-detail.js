@@ -7,11 +7,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         const response = await fetch(`/products/${id}`);
         if (!response.ok) throw new Error('找不到此商品');
         const product = await response.json();
+        console.log('產品數據:', product); // 調試用，檢查返回數據
 
+        // 確保 img 字段存在，否則使用預設圖片
+        const imgSrc = product.img ? `/uploads/${product.img}` : '/placeholder.jpg';
         container.innerHTML = `
             <div class="product-detail-page">
-                <img src="/uploads/${product.img}" alt="${product.name}" class="product-img">
-                <h1>${product.name}</h1>
+                <img src="${imgSrc}" alt="${product.name || '無名稱產品'}" class="product-img">
+                <h1>${product.name || '無名稱'}</h1>
                 <div class="product-detail-text">${product.description || ''}</div>
                 <div class="product-info">
                     <p><strong>價格：</strong>${product.price || '未提供'} 元</p>
