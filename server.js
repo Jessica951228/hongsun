@@ -7,9 +7,8 @@ const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const sessions = {};
-const db = new sqlite3.Database(path.join(__dirname, 'products.db')); // 使用 SQLite 資料庫
+const db = new sqlite3.Database(path.join(__dirname, 'products.db'));
 
-// 初始化資料庫表
 db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS products (
@@ -75,6 +74,21 @@ function isAuthenticated(req, res, next) {
     }
     res.status(401).json({ success: false, message: '未登入' });
 }
+
+// 備份端點
+app.get('/backup-db', isAuthenticated, (req, res) => {
+    const backupPath = path.join(__dirname, `products_backup_${new Date().toISOString().replace(/:/g, '-')}.db`);
+    db.backup(backupPath, (err) => {
+        if (err) {
+            console.error(`[${new Date().toISOString()}] 備份失敗: ${err.message}`);
+            return res.status(500).json({ success: false, message: '備份失敗' });
+        }
+        res.download(backupPath, `products_backup_${new Date().toISOString().split('T')[0]}.db`, (err) => {
+            if (err) console.error(`[${new Date().toISOString()}] 下載備份失敗: ${err.message}`);
+            fs.unlinkSync(backupPath); // 刪除臨時備份文件
+        });
+    });
+});
 
 app.get('/products', (req, res) => {
     db.all("SELECT * FROM products", [], (err, rows) => {
@@ -185,7 +199,6 @@ app.listen(PORT, () => {
     console.log(`[${new Date().toISOString()}] 伺服器已啟動，網址: http://localhost:${PORT}`);
 });
 
-// 關閉資料庫連接（避免資源洩漏）
 process.on('SIGTERM', () => {
     db.close();
 });

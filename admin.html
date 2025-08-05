@@ -82,5 +82,42 @@
         }
     </script>
     <script src="script.js"></script>
-</body>
+</body><div style="margin-top: 30px; text-align: center;">
+    <a href="index5.html" style="background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+        查看所有產品
+    </a>
+    <button onclick="backupDatabase()" style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
+        備份資料庫
+    </button>
+    <button onclick="logout()" style="background: #ff4444; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
+        登出
+    </button>
+</div>
+
+<script>
+    function logout() {
+        fetch('/logout', { method: 'POST' })
+            .then(() => window.location.href = '/login.html')
+            .catch(err => console.error('登出失敗:', err));
+    }
+
+    function backupDatabase() {
+        fetch('/backup-db', { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('備份請求失敗');
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `products_backup_${new Date().toISOString().split('T')[0]}.db`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => console.error('備份失敗:', err));
+    }
+</script>
 </html>
