@@ -1,1 +1,29 @@
-[]
+[
+    {
+        "id": "1",
+        "name": "行李箱帶",
+        "img": "luggage-strap.png",
+        "description": "耐用行李箱固定帶",
+        "price": "200",
+        "minOrder": "10",
+        "productionTime": "3天"
+    },
+    {
+        "id": "2",
+        "name": "機車套",
+        "img": "moto.png",
+        "description": "保護機車的專用套",
+        "price": "300",
+        "minOrder": "5",
+        "productionTime": "5天"
+    },
+    {
+        "id": "3",
+        "name": "識別證帶",
+        "img": "lanyard.png",
+        "description": "客製化識別證掛繩",
+        "price": "50",
+        "minOrder": "20",
+        "productionTime": "2天"
+    }
+]
