@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: 2 * 1024 * 1024 }, // 調整為 2MB，解決 File too large 問題
     fileFilter: function (req, file, cb) {
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
@@ -188,7 +188,7 @@ app.delete('/products/:id', isAuthenticated, (req, res) => {
 });
 
 app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) => {
-    console.log(`[${new Date().toISOString()}] 上傳請求收到, Headers: ${JSON.stringify(req.headers)}`);
+    console.log(`[${new Date().toISOString()}] 上傳請求收到, 文件大小: ${req.headers['content-length']} bytes, Headers: ${JSON.stringify(req.headers)}`);
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: '沒有上傳檔案' });
@@ -201,7 +201,7 @@ app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) =>
 });
 
 // 靜態檔案服務
-app.use(express.static(path.join(__dirname, '.')));
+app.use(express.static(path.join(__dirname, 'public'))); // 支援 favicon.ico
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
 // 動態路由
@@ -224,6 +224,11 @@ app.get('/download-products', (req, res) => {
     } else {
         res.status(404).json({ success: false, message: '文件不存在' });
     }
+});
+
+// 處理 favicon 請求，避免 404 日誌污染
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end(); // 無內容回應
 });
 
 // 錯誤處理中間件
