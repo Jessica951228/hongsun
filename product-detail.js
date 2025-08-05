@@ -5,11 +5,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     try {
         const response = await fetch(`/products/${id}`);
-        if (!response.ok) throw new Error('找不到此商品');
+        if (!response.ok) throw new Error(`找不到此商品 (狀態: ${response.status})`);
         const product = await response.json();
-        console.log('產品數據:', product); // 調試用，檢查返回數據
+        console.log('產品數據:', product);
 
-        // 確保 img 字段存在，否則使用預設圖片
         const imgSrc = product.img ? `/uploads/${product.img}` : '/placeholder.jpg';
         container.innerHTML = `
             <div class="product-detail-page">
@@ -26,6 +25,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         `;
     } catch (err) {
         console.error('錯誤:', err);
-        container.innerHTML = "<p>找不到此商品</p>";
+        container.innerHTML = `<p>找不到此商品: ${err.message}</p>`;
     }
 });
