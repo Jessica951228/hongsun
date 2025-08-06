@@ -3,6 +3,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     const id = params.get('id');
     const container = document.getElementById('product-detail');
 
+    if (!container) {
+        console.error('找不到 product-detail 容器');
+        return;
+    }
+
+    if (!id) {
+        console.error('無效的產品 ID:', id);
+        container.innerHTML = '<p>無效的產品 ID，請檢查鏈接。</p>';
+        return;
+    }
+
     try {
         const response = await fetch(`/products/${id}`);
         if (!response.ok) throw new Error(`找不到此商品 (狀態: ${response.status})`);
