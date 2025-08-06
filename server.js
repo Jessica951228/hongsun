@@ -75,7 +75,6 @@ function isAuthenticated(req, res, next) {
     res.status(401).json({ success: false, message: '未登入' });
 }
 
-// 備份端點
 app.get('/backup-db', isAuthenticated, (req, res) => {
     const backupPath = path.join(__dirname, `products_backup_${new Date().toISOString().replace(/:/g, '-')}.db`);
     db.backup(backupPath, (err) => {
@@ -85,7 +84,7 @@ app.get('/backup-db', isAuthenticated, (req, res) => {
         }
         res.download(backupPath, `products_backup_${new Date().toISOString().split('T')[0]}.db`, (err) => {
             if (err) console.error(`[${new Date().toISOString()}] 下載備份失敗: ${err.message}`);
-            fs.unlinkSync(backupPath); // 刪除臨時備份文件
+            fs.unlinkSync(backupPath);
         });
     });
 });
@@ -168,9 +167,11 @@ app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) =>
     }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+// 靜態檔案服務，直接從根目錄提供
+app.use(express.static(__dirname)); // 將靜態文件服務設為當前目錄
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
+// 動態路由
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index5.html'));
 });
