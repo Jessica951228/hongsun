@@ -176,9 +176,13 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index5.html'));
 });
 
-app.get('/admin.html', isAuthenticated, (req, res) => {
+app.get('/admin.html', (req, res) => {
     console.log(`[${new Date().toISOString()}] 訪問 /admin.html, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    if (!req.session.isAuthenticated) {
+        res.sendFile(path.join(__dirname, 'admin.html')); // 未登入時顯示登入表單
+    } else {
+        res.sendFile(path.join(__dirname, 'admin.html')); // 已登入時顯示後台
+    }
 });
 
 app.get('/favicon.ico', (req, res) => {
