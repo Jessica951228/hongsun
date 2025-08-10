@@ -92,7 +92,8 @@
                 <img src="${imgSrc}" alt="${product.name || '無名稱產品'}">
                 <p>${product.name || '無名稱'}</p>
                 <button class="view-detail-btn" onclick="window.location.href='product-detail.html?id=${product.id}'">了解更多</button>
-                <button class="delete-btn" onclick="deleteProduct('${product.id}')">移除</button>
+                <!-- 移除此按鈕 -->
+                <!-- <button class="delete-btn" onclick="deleteProduct('${product.id}')">移除</button> -->
             `;
             dynamicProducts.appendChild(div);
         });
@@ -101,16 +102,8 @@
     }
 }
 
-// 新增移除函數
-async function deleteProduct(id) {
-    try {
-        const response = await fetch(`/products/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error(`刪除失敗: ${response.status}`);
-        loadDynamicProducts(); // 刷新列表
-    } catch (err) {
-        console.error('刪除錯誤:', err);
-    }
-}
+// 移除 deleteProduct 函數
+// async function deleteProduct(id) { ... }
 
 // 頁面加載時執行
 loadDynamicProducts();

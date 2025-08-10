@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         message.textContent = addData.message;
 
         if (addData.success) {
-            loadProducts(); // 假設有此函數更新列表
+            loadProducts(); // 刷新產品列表
         }
     });
 
@@ -48,19 +48,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 載入產品列表
-    function loadProducts() {
-        fetch('/products')
-            .then(response => response.json())
-            .then(data => {
-                productList.innerHTML = '';
-                data.products.forEach(product => {
-                    const div = document.createElement('div');
-                    div.className = 'product-preview';
-                    div.innerHTML = `<img src="/uploads/${product.img}" alt="${product.name}"><span>${product.name}</span>`;
-                    productList.appendChild(div);
-                });
+    // 載入產品列表並添加刪除按鈕
+    async function loadProducts() {
+        try {
+            const response = await fetch('/products');
+            if (!response.ok) throw new Error(`無法載入產品: ${response.status}`);
+            const data = await response.json();
+            productList.innerHTML = '';
+            data.products.forEach(product => {
+                const div = document.createElement('div');
+                div.className = 'product-preview';
+                const imgSrc = product.img ? `/uploads/${product.img}` : '/placeholder.jpg';
+                div.innerHTML = `
+                    <img src="${imgSrc}" alt="${product.name}">
+                    <span>${product.name}</span>
+                    <button class="delete-btn" onclick="deleteProduct('${product.id}')">移除</button>
+                `;
+                productList.appendChild(div);
             });
+        } catch (err) {
+            console.error('載入產品錯誤:', err);
+        }
     }
-    loadProducts();
+
+    // 刪除產品
+    async function deleteProduct(id) {
+        try {
+            const response = await fetch(`/products/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error(`刪除失敗: ${response.status}`);
+            loadProducts(); // 刷新列表
+            message.textContent = '產品刪除成功！';
+        } catch (err) {
+            console.error('刪除錯誤:', err);
+            message.textContent = '刪除失敗: ' + err.message;
+        }
+    }
+
+    loadProducts(); // 初始載入
 });
