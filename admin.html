@@ -9,7 +9,6 @@
     <meta name="color-scheme" content="light only">
     <title>宏尚織帶有限公司後臺管理</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"> <!-- 添加 favicon 支援 -->
     <style>
         #imagePreview { max-width: 200px; margin-top: 10px; display: none; }
         #productList { margin-top: 20px; }
@@ -19,10 +18,6 @@
 </head>
 <body>
     <h1>宏尚織帶有限公司後臺管理</h1>
-    <div>
-        <input type="password" id="passwordInput" placeholder="輸入密碼">
-        <button id="loginButton">登入</button>
-    </div>
     <h2>新增產品</h2>
     <form id="addProductForm" enctype="multipart/form-data">
         <input type="text" name="name" placeholder="產品名稱" required><br><br>
@@ -31,13 +26,13 @@
         <textarea name="description" placeholder="產品描述" rows="4" cols="50"></textarea><br><br>
         <button type="submit" id="submitBtn">上傳</button>
     </form>
-    <div id="message">提示：請上傳小於 2MB 的圖片，建議壓縮至 500KB 以下。</div> <!-- 添加上傳提示 -->
+    <div id="message">提示：請上傳小於 2MB 的圖片，建議壓縮至 500KB 以下。</div>
     <div style="margin-top: 30px; text-align: center;">
         <a href="index5.html" style="background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
             查看所有產品
         </a>
-        <button onclick="logout()" style="background: #ff4444; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
-            登出
+        <button onclick="backupDatabase()" style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
+            備份資料庫
         </button>
     </div>
     <h2>已新增產品</h2>
@@ -75,49 +70,25 @@
 
     <script src="admin.js"></script>
     <script>
-        function logout() {
-            fetch('/logout', { method: 'POST' })
-                .then(() => window.location.href = '/login.html')
-                .catch(err => console.error('登出失敗:', err));
+        function backupDatabase() {
+            fetch('/backup-db', { method: 'GET' })
+                .then(response => {
+                    if (!response.ok) throw new Error('備份請求失敗');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `products_backup_${new Date().toISOString().split('T')[0]}.db`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(err => console.error('備份失敗:', err));
         }
     </script>
     <script src="script.js"></script>
-</body><div style="margin-top: 30px; text-align: center;">
-    <a href="index5.html" style="background: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-        查看所有產品
-    </a>
-    <button onclick="backupDatabase()" style="background: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
-        備份資料庫
-    </button>
-    <button onclick="logout()" style="background: #ff4444; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin-left: 10px;">
-        登出
-    </button>
-</div>
-
-<script>
-    function logout() {
-        fetch('/logout', { method: 'POST' })
-            .then(() => window.location.href = '/login.html')
-            .catch(err => console.error('登出失敗:', err));
-    }
-
-    function backupDatabase() {
-        fetch('/backup-db', { method: 'GET' })
-            .then(response => {
-                if (!response.ok) throw new Error('備份請求失敗');
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `products_backup_${new Date().toISOString().split('T')[0]}.db`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(err => console.error('備份失敗:', err));
-    }
-</script>
+</body>
 </html>

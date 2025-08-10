@@ -6,7 +6,6 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
-const sessions = {};
 const db = new sqlite3.Database(path.join(__dirname, 'products.db'));
 
 db.serialize(() => {
@@ -22,13 +21,6 @@ db.serialize(() => {
             createdAt TEXT
         )
     `);
-});
-
-app.use((req, res, next) => {
-    const sessionId = req.headers['x-session-id'] || 'none';
-    req.session = sessions[sessionId] || { isAuthenticated: false };
-    console.log(`[${new Date().toISOString()}] 請求: ${req.method} ${req.path}, Session ID: ${sessionId}, isAuthenticated: ${req.session.isAuthenticated}`);
-    next();
 });
 
 app.use(cors({
@@ -67,15 +59,7 @@ const upload = multer({
     }
 });
 
-function isAuthenticated(req, res, next) {
-    console.log(`[${new Date().toISOString()}] 檢查訪問: ${req.path}, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
-    if (req.session.isAuthenticated) {
-        return next();
-    }
-    res.status(401).json({ success: false, message: '未登入' });
-}
-
-app.get('/backup-db', isAuthenticated, (req, res) => {
+app.get('/backup-db', (req, res) => { // 移除 isAuthenticated
     const backupPath = path.join(__dirname, `products_backup_${new Date().toISOString().replace(/:/g, '-')}.db`);
     db.backup(backupPath, (err) => {
         if (err) {
@@ -98,6 +82,7 @@ app.get('/products', (req, res) => {
 
 app.get('/products/:id', (req, res) => {
     const productId = req.params.id;
+    console.log(`[${new Date().toISOString()}] 查詢產品 ID: ${productId}`);
     db.get("SELECT * FROM products WHERE id = ?", [productId], (err, row) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
         if (!row) return res.status(404).json({ success: false, message: '找不到該產品' });
@@ -105,7 +90,7 @@ app.get('/products/:id', (req, res) => {
     });
 });
 
-app.post('/add-product', isAuthenticated, (req, res) => {
+app.post('/add-product', (req, res) => { // 移除 isAuthenticated
     try {
         const { name, img, description, minOrder, productionTime, shopeeLink } = req.body;
         if (!name || !img) {
@@ -135,7 +120,7 @@ app.post('/add-product', isAuthenticated, (req, res) => {
     }
 });
 
-app.delete('/products/:id', isAuthenticated, (req, res) => {
+app.delete('/products/:id', (req, res) => { // 移除 isAuthenticated
     const productId = req.params.id;
     db.get("SELECT img FROM products WHERE id = ?", [productId], (err, row) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
@@ -154,7 +139,7 @@ app.delete('/products/:id', isAuthenticated, (req, res) => {
     });
 });
 
-app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) => {
+app.post('/upload-image', upload.single('image'), (req, res) => { // 移除 isAuthenticated
     console.log(`[${new Date().toISOString()}] 上傳請求收到, 文件大小: ${req.headers['content-length']} bytes, Headers: ${JSON.stringify(req.headers)}`);
     try {
         if (!req.file) {
@@ -167,22 +152,16 @@ app.post('/upload-image', isAuthenticated, upload.single('image'), (req, res) =>
     }
 });
 
-// 靜態檔案服務，直接從根目錄提供
-app.use(express.static(__dirname)); // 將靜態文件服務設為當前目錄
+app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'Uploads')));
 
-// 動態路由
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index5.html'));
 });
 
-app.get('/admin.html', (req, res) => {
-    console.log(`[${new Date().toISOString()}] 訪問 /admin.html, Session ID: ${req.headers['x-session-id'] || 'none'}, isAuthenticated: ${req.session.isAuthenticated}`);
-    if (!req.session.isAuthenticated) {
-        res.sendFile(path.join(__dirname, 'admin.html')); // 未登入時顯示登入表單
-    } else {
-        res.sendFile(path.join(__dirname, 'admin.html')); // 已登入時顯示後台
-    }
+app.get('/admin.html', (req, res) => { // 移除 isAuthenticated
+    console.log(`[${new Date().toISOString()}] 訪問 /admin.html`);
+    res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 app.get('/favicon.ico', (req, res) => {
