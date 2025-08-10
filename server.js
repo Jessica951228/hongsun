@@ -3,25 +3,27 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg'); // 添加 PostgreSQL 依賴
 
 const app = express();
-const db = new sqlite3.Database(path.join(__dirname, 'products.db'));
-
-db.serialize(() => {
-    db.run(`
-        CREATE TABLE IF NOT EXISTS products (
-            id TEXT PRIMARY KEY,
-            name TEXT,
-            img TEXT,
-            description TEXT,
-            minOrder TEXT,
-            productionTime TEXT,
-            shopeeLink TEXT,
-            createdAt TEXT
-        )
-    `);
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Render 要求 SSL
 });
+
+// 初始化資料表
+pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        img TEXT NOT NULL,
+        description TEXT,
+        minOrder TEXT,
+        productionTime TEXT,
+        shopeeLink TEXT,
+        createdAt TEXT NOT NULL
+    )
+`).catch(err => console.error('資料庫初始化失敗:', err));
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? 'https://hongsunweb.onrender.com' : 'http://localhost:3000'),
@@ -59,57 +61,32 @@ const upload = multer({
     }
 });
 
+// 備份資料庫（暫時保留 SQLite 備份邏輯，後續可優化）
 app.get('/backup-db', (req, res) => {
     const backupPath = path.join(__dirname, `products_backup_${new Date().toISOString().replace(/:/g, '-')}.db`);
-    const backup = db.backup(backupPath);
-
-    backup.on('complete', function (error) {
-        if (error) {
-            console.error(`[${new Date().toISOString()}] 備份失敗: ${error.message}`);
-            return res.status(500).json({ success: false, message: '備份失敗: ' + error.message });
-        }
-        console.log(`[${new Date().toISOString()}] 備份成功，檔案: ${backupPath}`);
-        res.download(backupPath, `products_backup_${new Date().toISOString().split('T')[0]}.db`, (err) => {
-            if (err) {
-                console.error(`[${new Date().toISOString()}] 下載備份失敗: ${err.message}`);
-            }
-            // 刪除臨時文件
-            fs.unlink(backupPath, (unlinkErr) => {
-                if (unlinkErr) console.error(`[${new Date().toISOString()}] 刪除備份檔案失敗: ${unlinkErr.message}`);
-            });
-        });
-    });
-
-    backup.on('error', function (error) {
-        console.error(`[${new Date().toISOString()}] 備份錯誤: ${error.message}`);
-        res.status(500).json({ success: false, message: '備份錯誤: ' + error.message });
-    });
-
-    backup.step(-1); // 執行備份
-    backup.finish(); // 完成備份
+    // 注意：PostgreSQL 備份需使用 pg_dump，後續可整合
+    res.status(501).json({ success: false, message: 'PostgreSQL 備份尚未實現，請聯繫管理員' });
 });
 
+// 獲取所有產品
 app.get('/products', (req, res) => {
-    db.all("SELECT * FROM products", [], (err, rows) => {
-        if (err) {
-            console.error(`[${new Date().toISOString()}] 查詢產品錯誤: ${err.message}`);
-            return res.status(500).json({ success: false, message: err.message });
-        }
-        console.log(`[${new Date().toISOString()}] 成功返回 ${rows.length} 個產品`);
-        res.json({ success: true, products: rows, total: rows.length });
+    pool.query("SELECT * FROM products", (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: err.message });
+        res.json({ success: true, products: result.rows, total: result.rowCount });
     });
 });
 
+// 獲取單一產品
 app.get('/products/:id', (req, res) => {
     const productId = req.params.id;
-    console.log(`[${new Date().toISOString()}] 查詢產品 ID: ${productId}`);
-    db.get("SELECT * FROM products WHERE id = ?", [productId], (err, row) => {
+    pool.query("SELECT * FROM products WHERE id = $1", [productId], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
-        if (!row) return res.status(404).json({ success: false, message: '找不到該產品' });
-        res.json({ success: true, product: row });
+        if (result.rowCount === 0) return res.status(404).json({ success: false, message: '找不到該產品' });
+        res.json({ success: true, product: result.rows[0] });
     });
 });
 
+// 新增產品
 app.post('/add-product', (req, res) => {
     try {
         const { name, img, description, minOrder, productionTime, shopeeLink } = req.body;
@@ -126,15 +103,11 @@ app.post('/add-product', (req, res) => {
             shopeeLink: shopeeLink || '',
             createdAt: new Date().toISOString()
         };
-        db.run(
-            "INSERT INTO products (id, name, img, description, minOrder, productionTime, shopeeLink, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        pool.query(
+            "INSERT INTO products (id, name, img, description, minOrder, productionTime, shopeeLink, createdAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
             [product.id, product.name, product.img, product.description, product.minOrder, product.productionTime, product.shopeeLink, product.createdAt],
             (err) => {
-                if (err) {
-                    console.error(`[${new Date().toISOString()}] 資料庫插入錯誤: ${err.message}`);
-                    return res.status(500).json({ success: false, message: err.message });
-                }
-                console.log(`[${new Date().toISOString()}] 產品新增成功: ${product.name}`);
+                if (err) return res.status(500).json({ success: false, message: err.message });
                 res.json({ success: true, message: '產品新增成功！', product: product });
             }
         );
@@ -144,27 +117,27 @@ app.post('/add-product', (req, res) => {
     }
 });
 
-app.delete('/products/:id', (req, res) => { // 移除 isAuthenticated
+// 刪除產品
+app.delete('/products/:id', (req, res) => {
     const productId = req.params.id;
-    db.get("SELECT img FROM products WHERE id = ?", [productId], (err, row) => {
+    pool.query("SELECT img FROM products WHERE id = $1", [productId], (err, result) => {
         if (err) return res.status(500).json({ success: false, message: err.message });
-        if (!row) return res.status(404).json({ success: false, message: '找不到該產品' });
-        db.run("DELETE FROM products WHERE id = ?", [productId], (err) => {
+        if (result.rowCount === 0) return res.status(404).json({ success: false, message: '找不到該產品' });
+        pool.query("DELETE FROM products WHERE id = $1", [productId], (err) => {
             if (err) return res.status(500).json({ success: false, message: err.message });
-            if (row.img) {
-                const imagePath = path.join(__dirname, 'Uploads', row.img);
-                if (fs.existsSync(imagePath)) {
-                    fs.unlinkSync(imagePath);
-                    console.log(`[${new Date().toISOString()}] 刪除圖片: ${imagePath}`);
-                }
+            const imagePath = path.join(__dirname, 'Uploads', result.rows[0].img);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+                console.log(`[${new Date().toISOString()}] 刪除圖片: ${imagePath}`);
             }
             res.json({ success: true, message: '產品刪除成功' });
         });
     });
 });
 
-app.post('/upload-image', upload.single('image'), (req, res) => { // 移除 isAuthenticated
-    console.log(`[${new Date().toISOString()}] 上傳請求收到, 文件大小: ${req.headers['content-length']} bytes, Headers: ${JSON.stringify(req.headers)}`);
+// 上傳圖片
+app.post('/upload-image', upload.single('image'), (req, res) => {
+    console.log(`[${new Date().toISOString()}] 上傳請求收到, 文件大小: ${req.headers['content-length']} bytes`);
     try {
         if (!req.file) {
             return res.status(400).json({ success: false, message: '沒有上傳檔案' });
@@ -183,7 +156,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index5.html'));
 });
 
-app.get('/admin.html', (req, res) => { // 移除 isAuthenticated
+app.get('/admin.html', (req, res) => {
     console.log(`[${new Date().toISOString()}] 訪問 /admin.html`);
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
@@ -208,5 +181,5 @@ app.listen(PORT, () => {
 });
 
 process.on('SIGTERM', () => {
-    db.close();
+    pool.end(() => console.log('資料庫連線關閉'));
 });
