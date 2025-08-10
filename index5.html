@@ -76,59 +76,44 @@
 
     <script>
         async function loadDynamicProducts() {
-            try {
-                const response = await fetch('/products', { credentials: 'include' });
-                if (!response.ok) throw new Error(`無法載入商品: ${response.status} ${response.statusText}`);
-                const data = await response.json();
-                if (!data.success) throw new Error(data.message || '載入商品失敗');
-                const dynamicProducts = document.getElementById('dynamic-products');
-                dynamicProducts.innerHTML = '';
-                data.products.forEach(product => {
-                    const div = document.createElement('div');
-                    div.className = 'product-item';
-                    div.style.display = 'inline-block';
-                    div.innerHTML = `
-                        <img src="/Uploads/${product.img}" alt="${product.name}">
-                        <p>${product.name}</p>
-                        <button class="view-detail-btn" onclick="window.location.href='product-detail.html?id=${product.id}'">了解更多</button>
-                    `;
-                    dynamicProducts.appendChild(div);
-                });
-            } catch (err) {
-                console.error('載入商品錯誤:', err);
-            }
-        }
-
-        document.getElementById('adminLink').addEventListener('click', async (e) => {
-            e.preventDefault();
-            try {
-                const response = await fetch('/check-auth', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-                if (!response.ok) {
-                    console.error(`HTTP 錯誤: ${response.status} ${response.statusText}`);
-                    throw new Error('無法檢查登入狀態');
-                }
-                const result = await response.json();
-                console.log('檢查登入狀態回應:', result);
-                if (!result.success) {
-                    throw new Error(result.message || '檢查登入狀態失敗');
-                }
-                if (result.isAuthenticated) {
-                    window.location.href = '/admin.html';
-                } else {
-                    alert('請先登入後台！');
-                    window.location.href = '/login.html';
-                }
-            } catch (err) {
-                console.error('檢查登入狀態失敗:', err);
-                alert('無法檢查登入狀態，請稍後再試');
-                window.location.href = '/login.html';
-            }
+    try {
+        const response = await fetch('/products', { credentials: 'include' });
+        if (!response.ok) throw new Error(`無法載入商品: ${response.status} ${response.statusText}`);
+        const data = await response.json();
+        if (!data.success) throw new Error(data.message || '載入商品失敗');
+        const dynamicProducts = document.getElementById('dynamic-products');
+        dynamicProducts.innerHTML = '';
+        data.products.forEach(product => {
+            const div = document.createElement('div');
+            div.className = 'product-item';
+            div.style.display = 'inline-block';
+            const imgSrc = product.img ? `/uploads/${product.img}` : '/placeholder.jpg';
+            div.innerHTML = `
+                <img src="${imgSrc}" alt="${product.name || '無名稱產品'}">
+                <p>${product.name || '無名稱'}</p>
+                <button class="view-detail-btn" onclick="window.location.href='product-detail.html?id=${product.id}'">了解更多</button>
+                <button class="delete-btn" onclick="deleteProduct('${product.id}')">移除</button>
+            `;
+            dynamicProducts.appendChild(div);
         });
+    } catch (err) {
+        console.error('載入商品錯誤:', err);
+    }
+}
 
-        loadDynamicProducts();
+// 新增移除函數
+async function deleteProduct(id) {
+    try {
+        const response = await fetch(`/products/${id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error(`刪除失敗: ${response.status}`);
+        loadDynamicProducts(); // 刷新列表
+    } catch (err) {
+        console.error('刪除錯誤:', err);
+    }
+}
+
+// 頁面加載時執行
+loadDynamicProducts();
     </script>
     <script src="product-data.js"></script>
     <script src="product-detail.js"></script>

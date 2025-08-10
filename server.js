@@ -75,7 +75,11 @@ app.get('/backup-db', (req, res) => { // 移除 isAuthenticated
 
 app.get('/products', (req, res) => {
     db.all("SELECT * FROM products", [], (err, rows) => {
-        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (err) {
+            console.error(`[${new Date().toISOString()}] 查詢產品錯誤: ${err.message}`);
+            return res.status(500).json({ success: false, message: err.message });
+        }
+        console.log(`[${new Date().toISOString()}] 成功返回 ${rows.length} 個產品`);
         res.json({ success: true, products: rows, total: rows.length });
     });
 });
@@ -90,7 +94,7 @@ app.get('/products/:id', (req, res) => {
     });
 });
 
-app.post('/add-product', (req, res) => { // 移除 isAuthenticated
+app.post('/add-product', (req, res) => {
     try {
         const { name, img, description, minOrder, productionTime, shopeeLink } = req.body;
         if (!name || !img) {
@@ -110,7 +114,11 @@ app.post('/add-product', (req, res) => { // 移除 isAuthenticated
             "INSERT INTO products (id, name, img, description, minOrder, productionTime, shopeeLink, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             [product.id, product.name, product.img, product.description, product.minOrder, product.productionTime, product.shopeeLink, product.createdAt],
             (err) => {
-                if (err) return res.status(500).json({ success: false, message: err.message });
+                if (err) {
+                    console.error(`[${new Date().toISOString()}] 資料庫插入錯誤: ${err.message}`);
+                    return res.status(500).json({ success: false, message: err.message });
+                }
+                console.log(`[${new Date().toISOString()}] 產品新增成功: ${product.name}`);
                 res.json({ success: true, message: '產品新增成功！', product: product });
             }
         );
