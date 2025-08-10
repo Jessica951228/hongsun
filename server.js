@@ -59,18 +59,34 @@ const upload = multer({
     }
 });
 
-app.get('/backup-db', (req, res) => { // 移除 isAuthenticated
+app.get('/backup-db', (req, res) => {
     const backupPath = path.join(__dirname, `products_backup_${new Date().toISOString().replace(/:/g, '-')}.db`);
-    db.backup(backupPath, (err) => {
-        if (err) {
-            console.error(`[${new Date().toISOString()}] 備份失敗: ${err.message}`);
-            return res.status(500).json({ success: false, message: '備份失敗' });
+    const backup = db.backup(backupPath);
+
+    backup.on('complete', function (error) {
+        if (error) {
+            console.error(`[${new Date().toISOString()}] 備份失敗: ${error.message}`);
+            return res.status(500).json({ success: false, message: '備份失敗: ' + error.message });
         }
+        console.log(`[${new Date().toISOString()}] 備份成功，檔案: ${backupPath}`);
         res.download(backupPath, `products_backup_${new Date().toISOString().split('T')[0]}.db`, (err) => {
-            if (err) console.error(`[${new Date().toISOString()}] 下載備份失敗: ${err.message}`);
-            fs.unlinkSync(backupPath);
+            if (err) {
+                console.error(`[${new Date().toISOString()}] 下載備份失敗: ${err.message}`);
+            }
+            // 刪除臨時文件
+            fs.unlink(backupPath, (unlinkErr) => {
+                if (unlinkErr) console.error(`[${new Date().toISOString()}] 刪除備份檔案失敗: ${unlinkErr.message}`);
+            });
         });
     });
+
+    backup.on('error', function (error) {
+        console.error(`[${new Date().toISOString()}] 備份錯誤: ${error.message}`);
+        res.status(500).json({ success: false, message: '備份錯誤: ' + error.message });
+    });
+
+    backup.step(-1); // 執行備份
+    backup.finish(); // 完成備份
 });
 
 app.get('/products', (req, res) => {

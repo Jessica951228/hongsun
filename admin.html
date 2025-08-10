@@ -71,24 +71,29 @@
 
     <script src="admin.js"></script>
     <script>
-        function backupDatabase() {
-            fetch('/backup-db', { method: 'GET' })
-                .then(response => {
-                    if (!response.ok) throw new Error('備份請求失敗');
-                    return response.blob();
-                })
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `products_backup_${new Date().toISOString().split('T')[0]}.db`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(err => console.error('備份失敗:', err));
-        }
+    function backupDatabase() {
+        const message = document.getElementById('message');
+        fetch('/backup-db', { method: 'GET' })
+            .then(response => {
+                if (!response.ok) throw new Error('備份請求失敗: ' + response.statusText);
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `products_backup_${new Date().toISOString().split('T')[0]}.db`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                message.textContent = '備份下載成功！';
+            })
+            .catch(err => {
+                console.error('備份失敗:', err);
+                message.textContent = '備份失敗: ' + err.message;
+            });
+    }
     </script>
     <script src="script.js"></script>
 </body>
