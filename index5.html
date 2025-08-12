@@ -42,8 +42,6 @@
         <div id="dynamic-products" class="product-grid"></div>
     </div>
 
-    
-
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-logo"><h3>宏尚織帶有限公司</h3></div>
@@ -74,40 +72,6 @@
         </div>
     </footer>
 
-    <script>
-        async function loadDynamicProducts() {
-    try {
-        const response = await fetch('/products', { credentials: 'include' });
-        if (!response.ok) throw new Error(`無法載入商品: ${response.status} ${response.statusText}`);
-        const data = await response.json();
-        if (!data.success) throw new Error(data.message || '載入商品失敗');
-        const dynamicProducts = document.getElementById('dynamic-products');
-        dynamicProducts.innerHTML = '';
-        data.products.forEach(product => {
-            const div = document.createElement('div');
-            div.className = 'product-item';
-            div.style.display = 'inline-block';
-            const imgSrc = product.img ? `/uploads/${product.img}` : '/placeholder.jpg';
-            div.innerHTML = `
-                <img src="${imgSrc}" alt="${product.name || '無名稱產品'}">
-                <p>${product.name || '無名稱'}</p>
-                <button class="view-detail-btn" onclick="window.location.href='product-detail.html?id=${product.id}'">了解更多</button>
-                <!-- 移除此按鈕 -->
-                <!-- <button class="delete-btn" onclick="deleteProduct('${product.id}')">移除</button> -->
-            `;
-            dynamicProducts.appendChild(div);
-        });
-    } catch (err) {
-        console.error('載入商品錯誤:', err);
-    }
-}
-
-// 移除 deleteProduct 函數
-// async function deleteProduct(id) { ... }
-
-// 頁面加載時執行
-loadDynamicProducts();
-    </script>
     <script src="product-data.js"></script>
     <script src="product-detail.js"></script>
     <script src="script.js"></script>

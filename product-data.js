@@ -1,4 +1,4 @@
- const products = [
+const products = [
     {
       id: 1,
       name: "行李箱帶",
@@ -102,7 +102,5 @@
       minOrder: "100條起訂",
       productionTime: "7-10個工作天",
       shopeeLink: "https://reurl.cc/QY84kq"
-    },
-    
-  ];  
-
+    }
+  ];
